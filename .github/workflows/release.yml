@@ -37,7 +37,7 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       INPUT_PLUGIN: ${{ inputs.plugin }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Which plugins to release
         id: plan
@@ -74,7 +74,7 @@ jobs:
       PUBLISH: ${{ github.event_name == 'push' || inputs.publish }}
       GH_TOKEN: ${{ github.token }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Build
         # Odoo's tests run in a pod, which only podman has; the others use docker.
@@ -109,7 +109,7 @@ jobs:
           echo "$PLUGIN $version: $zips"
 
       - name: Keep the zips
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ steps.meta.outputs.tag }}
           path: ${{ matrix.plugin }}/dist/*.zip

@@ -1,6 +1,7 @@
 # Builds one plugin with its own build.sh (lint and tests included) and publishes the zip as the GitHub
 # Release <plugin>-v<version>. The version is the one in the plugin's source; a version already
 # released is refused, so bump it (and its changelog entry) in the MPS monorepo and mirror first.
+# The release <plugin>-latest then gets the same zip under its stable name (.github/update-latest.sh).
 #
 # Run it from Actions › Release, or: gh workflow run release.yml -f plugin=woocommerce
 # With publish off it only builds, and leaves the zips as a workflow artifact.
@@ -87,3 +88,7 @@ jobs:
             --target "$GITHUB_SHA" \
             --title "$PLUGIN ${{ steps.meta.outputs.version }}" \
             --notes-file "$RUNNER_TEMP/notes.md"
+
+      - name: Point <plugin>-latest at it
+        if: inputs.publish
+        run: .github/update-latest.sh "$PLUGIN" "${{ steps.meta.outputs.version }}"

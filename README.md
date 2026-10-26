@@ -13,8 +13,9 @@ the order is settled from the payment as MPS reports it.
 ## Download
 
 Every version is a [GitHub Release](../../releases) named `<plugin>-v<version>`, with the installable
-zip attached. Install it the way the platform installs an uploaded plugin; each plugin's README and
-changelog say what changed.
+zip attached. The release `<plugin>-latest` always holds the newest one under a name that does not
+change, e.g. `releases/download/woocommerce-latest/mps-payments.zip`. Install it the way the platform
+installs an uploaded plugin; each plugin's README and changelog say what changed.
 
 ## Build
 

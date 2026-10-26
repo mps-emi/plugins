@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <mps_payments>
+                <active>0</active>
+                <model>MpsPaymentsFacade</model>
+                <title>MPS</title>
+                <instructions>Pay by card or with your banking app on the secure MPS payment page.</instructions>
+                <client_secret backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+                <webhook_secret backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+                <gateway_url>https://gateway.mps-emi.com</gateway_url>
+                <debug>0</debug>
+                <!-- The shopper is sent to MPS after the order is placed; it starts pending payment and is settled from MPS. -->
+                <payment_action>order</payment_action>
+                <order_status>pending_payment</order_status>
+                <is_gateway>1</is_gateway>
+                <can_initialize>1</can_initialize>
+                <can_use_checkout>1</can_use_checkout>
+                <can_use_internal>0</can_use_internal>
+                <!-- A placed order is not confirmed by e-mail until MPS says it is paid. -->
+                <order_place_redirect_url>1</order_place_redirect_url>
+                <!-- Shown with the payment on the order (Block\Info), in the admin and to the shopper alike. -->
+                <paymentInfoKeys>mps_payment_reference</paymentInfoKeys>
+                <allowspecific>0</allowspecific>
+                <sort_order>10</sort_order>
+            </mps_payments>
+        </payment>
+    </default>
+</config>

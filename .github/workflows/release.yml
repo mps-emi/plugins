@@ -1,0 +1,89 @@
+# Builds one plugin with its own build.sh (lint and tests included) and publishes the zip as the GitHub
+# Release <plugin>-v<version>. The version is the one in the plugin's source; a version already
+# released is refused, so bump it (and its changelog entry) in the MPS monorepo and mirror first.
+#
+# Run it from Actions › Release, or: gh workflow run release.yml -f plugin=woocommerce
+# With publish off it only builds, and leaves the zips as a workflow artifact.
+name: Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      plugin:
+        description: Plugin to release
+        type: choice
+        options: [woocommerce, magento, prestashop, odoo]
+      publish:
+        description: Publish the GitHub Release (off = build only)
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ inputs.plugin }}
+
+jobs:
+  release:
+    runs-on: ubuntu-24.04
+    env:
+      PLUGIN: ${{ inputs.plugin }}
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Build
+        # Odoo's tests run in a pod, which only podman has; the others use docker.
+        run: |
+          if [[ "$PLUGIN" == odoo ]]; then export CONTAINER_CLI=podman; fi
+          "./$PLUGIN/build.sh"
+
+      - name: Version and notes
+        id: meta
+        run: |
+          set -euo pipefail
+          cd "$PLUGIN/dist"
+          # Every versioned zip a build writes carries the same version: <name>-<version>.zip.
+          version="$(ls *.zip | sed -n 's/^.*-\([0-9][0-9.]*\)\.zip$/\1/p' | sort -u)"
+          [[ "$(wc -l <<<"$version")" == 1 && -n "$version" ]] || { echo "No single version in: $(ls)" >&2; exit 1; }
+
+          # The merchant's zip only: the stable-name copy is the same file, and WooCommerce's
+          # Marketplace zip is uploaded to Woo.com, not installed from here.
+          zips=$(ls *-"$version".zip | grep -v marketplace)
+
+          # This version's changelog entry: CHANGELOG.md "## <version>", or WooCommerce's readme.txt
+          # "= <version> =".
+          if [[ -f ../CHANGELOG.md ]]; then
+            awk -v v="## $version" '$0 == v { on = 1; next } on && /^## / { exit } on' ../CHANGELOG.md > "$RUNNER_TEMP/notes.md"
+          else
+            awk -v v="= $version =" '$0 == v { on = 1; next } on && /^= / { exit } on' ../mps-payments/readme.txt > "$RUNNER_TEMP/notes.md"
+          fi
+
+          {
+            echo "version=$version"
+            echo "tag=$PLUGIN-v$version"
+            echo "zips=$(echo $zips)"
+          } >> "$GITHUB_OUTPUT"
+          echo "$PLUGIN $version: $zips"
+
+      - name: Keep the zips
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: ${{ steps.meta.outputs.tag }}
+          path: ${{ inputs.plugin }}/dist/*.zip
+
+      - name: Publish the release
+        if: inputs.publish
+        run: |
+          set -euo pipefail
+          tag="${{ steps.meta.outputs.tag }}"
+          if gh release view "$tag" >/dev/null 2>&1; then
+            echo "$tag is already released; bump the version to release again" >&2
+            exit 1
+          fi
+          cd "$PLUGIN/dist"
+          gh release create "$tag" ${{ steps.meta.outputs.zips }} \
+            --target "$GITHUB_SHA" \
+            --title "$PLUGIN ${{ steps.meta.outputs.version }}" \
+            --notes-file "$RUNNER_TEMP/notes.md"

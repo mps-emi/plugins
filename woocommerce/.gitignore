@@ -1,0 +1,4 @@
+dist/
+*.mo
+dev/browser/node_modules/
+dev/browser/package-lock.json

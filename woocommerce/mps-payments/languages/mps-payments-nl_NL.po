@@ -1,0 +1,132 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: MPS Payments for WooCommerce\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: nl_NL\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Domain: mps-payments\n"
+
+msgid "MPS Payments for WooCommerce"
+msgstr "MPS Payments voor WooCommerce"
+
+msgid "https://www.mps-emi.com"
+msgstr "https://www.mps-emi.com"
+
+msgid "Take payments in your WooCommerce shop on the MPS-hosted checkout page."
+msgstr "Ontvang betalingen in uw WooCommerce-webshop op de betaalpagina van MPS."
+
+msgid "Mobile Payment Solutions"
+msgstr "Mobile Payment Solutions"
+
+msgid "MPS Payments"
+msgstr "MPS Payments"
+
+msgid "Payments on the checkout page MPS hosts. Card details never reach your shop."
+msgstr "Betalingen op de betaalpagina van MPS. Kaartgegevens komen nooit in uw webshop terecht."
+
+msgid "Enable"
+msgstr "Inschakelen"
+
+msgid "Offer MPS Payments at checkout"
+msgstr "MPS Payments aanbieden bij het afrekenen"
+
+msgid "Title"
+msgstr "Titel"
+
+msgid "The name of this payment method at checkout."
+msgstr "De naam van deze betaalmethode bij het afrekenen."
+
+msgid "MPS"
+msgstr "MPS"
+
+msgid "Description"
+msgstr "Beschrijving"
+
+msgid "Shown under the title at checkout."
+msgstr "Getoond onder de titel bij het afrekenen."
+
+msgid "Pay by card or with your banking app on the secure MPS payment page."
+msgstr "Betaal met uw kaart of met uw bankapp op de beveiligde betaalpagina van MPS."
+
+msgid "Connection"
+msgstr "Verbinding"
+
+msgid "Paste the client ID, secret and webhook signing secret from the MPS platform (Online › Get started). A test key, whose client ID starts with test_, works for 24 hours and accepts only the MPS test cards: no card is charged and nothing is paid out."
+msgstr "Plak de client-ID, het geheim en het ondertekeningsgeheim voor webhooks uit het MPS-platform (Online › Aan de slag). Een testsleutel, waarvan de client-ID met test_ begint, werkt 24 uur en aanvaardt enkel de MPS-testkaarten: er wordt geen kaart gedebiteerd en niets uitbetaald."
+
+msgid "This payment method sends the order amount, order number and your shop's return addresses to MPS (Mobile Payment Solutions) to open each payment."
+msgstr "Deze betaalmethode stuurt het bedrag en het nummer van de bestelling en de terugkeeradressen van uw webshop naar MPS (Mobile Payment Solutions) om elke betaling te openen."
+
+msgid "Client ID"
+msgstr "Client-ID"
+
+msgid "Client secret"
+msgstr "Clientgeheim"
+
+msgid "Webhook signing secret"
+msgstr "Ondertekeningsgeheim voor webhooks"
+
+msgid "Shown with your key in the MPS platform. Payment notifications are only acted on when their signature matches; without a secret they are ignored and orders are settled by the plugin's own checks."
+msgstr "Wordt samen met uw sleutel getoond in het MPS-platform. Betalingsmeldingen worden enkel verwerkt als hun handtekening klopt; zonder geheim worden ze genegeerd en worden bestellingen afgehandeld door de eigen controles van de plugin."
+
+msgid "Advanced"
+msgstr "Geavanceerd"
+
+msgid "Gateway URL"
+msgstr "Gateway-URL"
+
+msgid "Leave as is unless MPS asks you to change it."
+msgstr "Niet wijzigen, tenzij MPS u daarom vraagt."
+
+msgid "Set by MPS_PAYMENTS_GATEWAY_URL in wp-config.php."
+msgstr "Ingesteld door MPS_PAYMENTS_GATEWAY_URL in wp-config.php."
+
+msgid "Debug log"
+msgstr "Foutopsporingslog"
+
+msgid "Log every call to MPS in WooCommerce › Status › Logs (never secrets or payment links)"
+msgstr "Elke oproep naar MPS loggen in WooCommerce › Status › Logs (nooit geheimen of betaallinks)"
+
+msgid "Connected to MPS with a test key. It works for 24 hours and accepts only the MPS test cards; no card is charged."
+msgstr "Verbonden met MPS met een testsleutel. Die werkt 24 uur en aanvaardt enkel de MPS-testkaarten; er wordt geen kaart gedebiteerd."
+
+msgid "Connected to MPS."
+msgstr "Verbonden met MPS."
+
+#, php-format
+msgid "MPS did not accept these credentials: %s"
+msgstr "MPS heeft deze gegevens niet aanvaard: %s"
+
+msgid "MPS could not open a payment. Enable the debug log for details."
+msgstr "MPS kon geen betaling openen. Schakel het foutopsporingslog in voor details."
+
+msgid "The payment could not be started. Please try again or choose another payment method."
+msgstr "De betaling kon niet worden gestart. Probeer het opnieuw of kies een andere betaalmethode."
+
+#, php-format
+msgid "MPS payment %s opened; shopper sent to the MPS checkout."
+msgstr "MPS-betaling %s geopend; klant doorgestuurd naar de betaalpagina van MPS."
+
+msgid "Your payment was not completed. Please try again or choose another payment method."
+msgstr "Uw betaling is niet voltooid. Probeer het opnieuw of kies een andere betaalmethode."
+
+#, php-format
+msgid "MPS approved %1$s of %2$s (payment %3$s). Check before shipping."
+msgstr "MPS keurde %1$s van %2$s goed (betaling %3$s). Controleer dit vóór verzending."
+
+#, php-format
+msgid "MPS payment %s paid."
+msgstr "MPS-betaling %s betaald."
+
+#, php-format
+msgid "MPS payment %s failed."
+msgstr "MPS-betaling %s mislukt."
+
+#, php-format
+msgid "The shopper left MPS payment %s without paying."
+msgstr "De klant verliet MPS-betaling %s zonder te betalen."
+
+msgid "Settings"
+msgstr "Instellingen"

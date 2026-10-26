@@ -1,0 +1,87 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- The payment method: Magento's gateway adapter, with one command — put the new order on pending payment. -->
+    <virtualType name="MpsPaymentsFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">Mps\Payments\Model\Config::METHOD_CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Mps\Payments\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">MpsPaymentsValueHandlerPool</argument>
+            <argument name="validatorPool" xsi:type="object">MpsPaymentsValidatorPool</argument>
+            <argument name="commandPool" xsi:type="object">MpsPaymentsCommandPool</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MpsPaymentsGatewayConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Mps\Payments\Model\Config::METHOD_CODE</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- The payment on the order view: the keys in config.xml's paymentInfoKeys, read through the method's config. -->
+    <type name="Mps\Payments\Block\Info">
+        <arguments>
+            <argument name="config" xsi:type="object">MpsPaymentsGatewayConfig</argument>
+        </arguments>
+    </type>
+
+    <virtualType name="MpsPaymentsConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">MpsPaymentsGatewayConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MpsPaymentsValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">MpsPaymentsConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MpsPaymentsCountryValidator" type="Magento\Payment\Gateway\Validator\CountryValidator">
+        <arguments>
+            <argument name="config" xsi:type="object">MpsPaymentsGatewayConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MpsPaymentsValidatorPool" type="Magento\Payment\Gateway\Validator\ValidatorPool">
+        <arguments>
+            <argument name="validators" xsi:type="array">
+                <item name="country" xsi:type="string">MpsPaymentsCountryValidator</item>
+                <item name="currency" xsi:type="string">Mps\Payments\Gateway\Validator\CurrencyValidator</item>
+                <item name="availability" xsi:type="string">Mps\Payments\Gateway\Validator\AvailabilityValidator</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MpsPaymentsCommandPool" type="Magento\Payment\Gateway\Command\CommandPool">
+        <arguments>
+            <argument name="commands" xsi:type="array">
+                <item name="initialize" xsi:type="string">Mps\Payments\Gateway\Command\InitializeCommand</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- The debug log: var/log/mps_payments.log, written only while Debug log is on (Model\DebugLog). -->
+    <virtualType name="MpsPaymentsLogHandler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/mps_payments.log</argument>
+        </arguments>
+    </virtualType>
+
+    <virtualType name="MpsPaymentsLogger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">mps-payments</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="file" xsi:type="object">MpsPaymentsLogHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <type name="Mps\Payments\Model\DebugLog">
+        <arguments>
+            <argument name="logger" xsi:type="object">MpsPaymentsLogger</argument>
+        </arguments>
+    </type>
+</config>

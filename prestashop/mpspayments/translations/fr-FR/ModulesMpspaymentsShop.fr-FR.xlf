@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="mpspayments" source-language="en-US" target-language="fr-FR" datatype="plaintext">
+    <body>
+      <trans-unit id="f23b4c22b44974ea5f55b5d997af5dde">
+        <source>Pay with MPS</source>
+        <target>Payer avec MPS</target>
+      </trans-unit>
+      <trans-unit id="0af127a8cd1cbf97b57bc02e85619039">
+        <source>Pay by card or with your banking app on the secure MPS payment page.</source>
+        <target>Payez par carte ou avec votre application bancaire sur la page de paiement sécurisée de MPS.</target>
+      </trans-unit>
+      <trans-unit id="3af4f447f43aa28d3bcad34273265089">
+        <source>The payment could not be started. Please try again or choose another payment method.</source>
+        <target>Le paiement n'a pas pu être lancé. Réessayez ou choisissez un autre moyen de paiement.</target>
+      </trans-unit>
+      <trans-unit id="f2af8f2bc21c20f6c1d9daefd31b66cc">
+        <source>Your payment was not completed. Please try again or choose another payment method.</source>
+        <target>Votre paiement n'a pas abouti. Réessayez ou choisissez un autre moyen de paiement.</target>
+      </trans-unit>
+      <trans-unit id="c206e54ef3978c16ef4244f50dae52d3">
+        <source>We are confirming your payment</source>
+        <target>Nous confirmons votre paiement</target>
+      </trans-unit>
+      <trans-unit id="2d6b877439b3c9e0045bcedce83a792d">
+        <source>This takes a few seconds. This page refreshes by itself.</source>
+        <target>Cela prend quelques secondes. Cette page s'actualise d'elle-même.</target>
+      </trans-unit>
+      <trans-unit id="5c14f1754bd750d014b1277ff14f8bdd">
+        <source>MPS has not confirmed your payment yet. You will receive an e-mail as soon as your order is confirmed; there is no need to pay again.</source>
+        <target>MPS n'a pas encore confirmé votre paiement. Vous recevrez un e-mail dès que votre commande sera confirmée ; inutile de payer à nouveau.</target>
+      </trans-unit>
+      <trans-unit id="6b7f18bda75d9330adab8be0bba1898d">
+        <source>Your payment was received.</source>
+        <target>Votre paiement a bien été reçu.</target>
+      </trans-unit>
+      <trans-unit id="b913dabf84a2fbeb711e6873210228b7">
+        <source>Order reference:</source>
+        <target>Référence de la commande :</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

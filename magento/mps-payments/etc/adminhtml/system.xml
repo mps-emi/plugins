@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment">
+            <group id="mps_payments" translate="label comment" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>MPS Payments</label>
+                <comment>Payments on the checkout page MPS hosts. Card details never reach your shop. This payment method sends the order amount, order number and your shop's return addresses to MPS (Mobile Payment Solutions) to open each payment.</comment>
+                <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="title" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Title</label>
+                    <comment>The name of this payment method at checkout.</comment>
+                </field>
+                <field id="instructions" translate="label comment" type="textarea" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Description</label>
+                    <comment>Shown under the title at checkout.</comment>
+                </field>
+                <field id="client_id" translate="label comment" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Client ID</label>
+                    <comment>Paste the client ID, secret and webhook signing secret from the MPS platform (Online › Get started). A test key, whose client ID starts with test_, works for 24 hours and accepts only the MPS test cards: no card is charged and nothing is paid out.</comment>
+                </field>
+                <field id="client_secret" translate="label" type="obscure" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Client secret</label>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="webhook_secret" translate="label comment" type="obscure" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Webhook signing secret</label>
+                    <comment>Shown with your key in the MPS platform. Payment notifications are only acted on when their signature matches; without a secret they are ignored and orders are settled by the module's own checks.</comment>
+                    <backend_model>Magento\Config\Model\Config\Backend\Encrypted</backend_model>
+                </field>
+                <field id="gateway_url" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Gateway URL</label>
+                    <comment>Leave as is unless MPS asks you to change it.</comment>
+                    <validate>validate-url</validate>
+                </field>
+                <field id="debug" translate="label comment" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Debug log</label>
+                    <comment>Log every call to MPS in var/log/mps_payments.log (never secrets or payment links).</comment>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Applicable Countries</label>
+                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                </field>
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Payment from Specific Countries</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                    <can_be_empty>1</can_be_empty>
+                </field>
+                <field id="sort_order" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="0">
+                    <label>Sort Order</label>
+                    <frontend_class>validate-number</frontend_class>
+                </field>
+            </group>
+        </section>
+    </system>
+</config>

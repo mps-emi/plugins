@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xliff xmlns="urn:oasis:names:tc:xliff:document:1.2" version="1.2">
+  <file original="mpspayments" source-language="en-US" target-language="nl-NL" datatype="plaintext">
+    <body>
+      <trans-unit id="5eb6030119b2d7fef362b396e0de88b4">
+        <source>MPS Payments</source>
+        <target>MPS Payments</target>
+      </trans-unit>
+      <trans-unit id="5b91184bf32c02d1eb85e09b44e093ac">
+        <source>Take payments in your PrestaShop shop on the MPS-hosted checkout page.</source>
+        <target>Ontvang betalingen in uw PrestaShop-webshop op de betaalpagina van MPS.</target>
+      </trans-unit>
+      <trans-unit id="f95f86c95c4ec2a291ebaf74c01256a9">
+        <source>MPS did not accept these credentials: %reason%</source>
+        <target>MPS heeft deze gegevens niet aanvaard: %reason%</target>
+      </trans-unit>
+      <trans-unit id="b2c878a7b703faed2e1eeab2589d5c99">
+        <source>Connected to MPS with a test key. It works for 24 hours and accepts only the MPS test cards; no card is charged.</source>
+        <target>Verbonden met MPS met een testsleutel. Die werkt 24 uur en aanvaardt enkel de testkaarten van MPS; er wordt geen kaart gedebiteerd.</target>
+      </trans-unit>
+      <trans-unit id="122738e00ea14387e32582757c5f609a">
+        <source>Connected to MPS.</source>
+        <target>Verbonden met MPS.</target>
+      </trans-unit>
+      <trans-unit id="21dbac9461f8ec4ca19d3fe3907a1776">
+        <source>Gateway URL</source>
+        <target>Gateway-URL</target>
+      </trans-unit>
+      <trans-unit id="6c0d9e3f4b13937f793d701471f4a5bf">
+        <source>Set by _PS_MPS_PAYMENTS_GATEWAY_URL_ in config/defines_custom.inc.php.</source>
+        <target>Ingesteld door _PS_MPS_PAYMENTS_GATEWAY_URL_ in config/defines_custom.inc.php.</target>
+      </trans-unit>
+      <trans-unit id="7a670bd41836010056ccfcc987fef09e">
+        <source>Leave as is unless MPS asks you to change it.</source>
+        <target>Niet wijzigen, tenzij MPS u daarom vraagt.</target>
+      </trans-unit>
+      <trans-unit id="52ff60e3de02a0ff6260de3420dbcb9f">
+        <source>Payments on the checkout page MPS hosts. Card details never reach your shop.</source>
+        <target>Betalingen op de betaalpagina van MPS. Kaartgegevens komen nooit in uw webshop terecht.</target>
+      </trans-unit>
+      <trans-unit id="ff3a5b6256036835c0fbfdcd75f8a121">
+        <source>This payment method sends the order amount, order number and your shop's return addresses to MPS (Mobile Payment Solutions) to open each payment.</source>
+        <target>Deze betaalmethode stuurt het bedrag en het nummer van de bestelling en de terugkeeradressen van uw webshop naar MPS (Mobile Payment Solutions) om elke betaling te openen.</target>
+      </trans-unit>
+      <trans-unit id="02722c5e9c8386ebb325c35aa272b319">
+        <source>The gateway URL must be an absolute address starting with https://. The previous one was kept.</source>
+        <target>De gateway-URL moet een volledig adres zijn dat met https:// begint. Het vorige adres werd behouden.</target>
+      </trans-unit>
+      <trans-unit id="06eca4f53ba6a00bc5d55413a644697b">
+        <source>MPS Payments needs the PHP curl extension. Ask your host to enable it, then install the module again.</source>
+        <target>MPS Payments heeft de PHP-extensie curl nodig. Vraag uw hostingprovider die in te schakelen en installeer de module daarna opnieuw.</target>
+      </trans-unit>
+      <trans-unit id="76525f0f34b48475e5ca33f71d296f3b">
+        <source>Client ID</source>
+        <target>Client-ID</target>
+      </trans-unit>
+      <trans-unit id="7e2122887831fe7d54cb7ea0d6230528">
+        <source>Paste the client ID, secret and webhook signing secret from the MPS platform (Online › Get started). A test key, whose client ID starts with test_, works for 24 hours and accepts only the MPS test cards: no card is charged and nothing is paid out.</source>
+        <target>Plak de client-ID, het clientgeheim en het ondertekeningsgeheim voor webhooks uit het MPS-platform (Online › Aan de slag). Een testsleutel, waarvan de client-ID met test_ begint, werkt 24 uur en aanvaardt enkel de testkaarten van MPS: er wordt geen kaart gedebiteerd en niets uitbetaald.</target>
+      </trans-unit>
+      <trans-unit id="1b4739e491387ef5d8a546854308e5fe">
+        <source>Client secret</source>
+        <target>Clientgeheim</target>
+      </trans-unit>
+      <trans-unit id="6b2bed9c2c8c8248278917caae31ea82">
+        <source>Saved. Leave empty to keep it.</source>
+        <target>Opgeslagen. Laat leeg om het te behouden.</target>
+      </trans-unit>
+      <trans-unit id="953ae48f78d4ab5a30089b327bc5582b">
+        <source>Webhook signing secret</source>
+        <target>Ondertekeningsgeheim voor webhooks</target>
+      </trans-unit>
+      <trans-unit id="8baa47e272efcf9de7aa1f6c98ab3817">
+        <source>Shown with your key in the MPS platform. Payment notifications are only acted on when their signature matches; without a secret they are ignored and orders are settled by the module's own checks.</source>
+        <target>Wordt bij uw sleutel getoond in het MPS-platform. Betaalmeldingen worden enkel verwerkt als hun handtekening klopt; zonder geheim worden ze genegeerd en worden bestellingen afgehandeld door de eigen controles van de module.</target>
+      </trans-unit>
+      <trans-unit id="9d65e7ef60812046efe911883bdf82d5">
+        <source>Remove the webhook signing secret</source>
+        <target>Ondertekeningsgeheim voor webhooks verwijderen</target>
+      </trans-unit>
+      <trans-unit id="cd92e21218612817d52a8d71c32faf38">
+        <source>Debug log</source>
+        <target>Foutopsporingslog</target>
+      </trans-unit>
+      <trans-unit id="40de7ffe8e082aecf0e4798ee009d693">
+        <source>Log every call to MPS in Advanced Parameters › Logs (never secrets or payment links).</source>
+        <target>Elke oproep naar MPS loggen in Geavanceerde instellingen › Logboeken (nooit geheimen of betaallinks).</target>
+      </trans-unit>
+      <trans-unit id="b78a3223503896721cca1303f776159b">
+        <source>Title</source>
+        <target>Titel</target>
+      </trans-unit>
+      <trans-unit id="c3dde366b49627692bd7407cd7cb4e6e">
+        <source>The name of this payment method at checkout. Empty: "%default%", in the shopper's language.</source>
+        <target>De naam van deze betaalmethode bij het afrekenen. Leeg: "%default%", in de taal van de klant.</target>
+      </trans-unit>
+      <trans-unit id="b5a7adde1af5c87d7fd797b6245c2a39">
+        <source>Description</source>
+        <target>Beschrijving</target>
+      </trans-unit>
+      <trans-unit id="cf47a6f71af2b4583d39bef436404f6d">
+        <source>Shown under the title at checkout. Empty: a standard text in the shopper's language.</source>
+        <target>Getoond onder de titel bij het afrekenen. Leeg: een standaardtekst in de taal van de klant.</target>
+      </trans-unit>
+      <trans-unit id="e1c47b3918183d2e30188a84236149c3">
+        <source>Scheduled checks</source>
+        <target>Geplande controles</target>
+      </trans-unit>
+      <trans-unit id="fb6b2388f2314ddaf725fd85fb9e26a2">
+        <source>Call this address every 5 minutes (a crontab line, or the Cron tasks manager module). It confirms orders whose shopper closed the tab before returning, on a shop MPS cannot notify.</source>
+        <target>Roep dit adres elke 5 minuten op (een crontab-regel, of de module Cron tasks manager). Zo worden bestellingen bevestigd waarvan de klant het tabblad sloot voor de terugkeer, in een webshop die MPS niet kan verwittigen.</target>
+      </trans-unit>
+      <trans-unit id="8dfd2c04d06c16de209a79cbcb037f33">
+        <source>MPS payment %ref% for this cart was paid too, after the order was made. Refund it in MPS.</source>
+        <target>MPS-betaling %ref% voor dit winkelmandje werd ook betaald, nadat de bestelling al was aangemaakt. Betaal ze terug in MPS.</target>
+      </trans-unit>
+      <trans-unit id="0842d6d45c1112f4394b124cff9da47c">
+        <source>MPS approved %approved% of %expected% (payment %ref%). Check before shipping.</source>
+        <target>MPS keurde %approved% van %expected% goed (betaling %ref%). Controleer dit vóór verzending.</target>
+      </trans-unit>
+    </body>
+  </file>
+</xliff>

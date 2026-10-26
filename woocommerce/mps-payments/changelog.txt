@@ -1,0 +1,6 @@
+*** MPS Payments for WooCommerce Changelog ***
+
+2026-10-22 - version 0.1.0
+* First release: payments on the MPS-hosted checkout, block and classic checkout, Dutch, French and English.
+* Payment notifications are acted on only when they carry a valid signature; without a webhook signing secret they are ignored and orders are settled by the plugin's own checks.
+* Tested with WordPress 7.0 and 7.1 and WooCommerce 11.2.

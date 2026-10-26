@@ -24,9 +24,12 @@ Each folder builds on its own with `./build.sh`, which lints and tests the plugi
 
 ## Releasing
 
-Actions › **Release** › choose the plugin, or `gh workflow run release.yml -f plugin=<plugin>`. The
-workflow runs that plugin's `build.sh` and publishes the zip as the release `<plugin>-v<version>`, the
-version being the one in the plugin's source. A version that is already released is refused.
+A push to `main` releases every plugin whose version has no release yet: the workflow runs that plugin's
+`build.sh` and publishes the zip as the release `<plugin>-v<version>`, then points `<plugin>-latest` at
+it. Plugins whose version is already released are left alone, so bumping the version is what releases.
+
+By hand: Actions › **Release** › choose the plugin, or `gh workflow run release.yml -f plugin=<plugin>`.
+A version that is already released is refused.
 
 ## Where changes are made
 

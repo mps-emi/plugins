@@ -1,13 +1,19 @@
-# Builds one plugin with its own build.sh (lint and tests included) and publishes the zip as the GitHub
-# Release <plugin>-v<version>. The version is the one in the plugin's source; a version already
-# released is refused, so bump it (and its changelog entry) in the MPS monorepo and mirror first.
-# The release <plugin>-latest then gets the same zip under its stable name (.github/update-latest.sh).
+# Releases the plugins. Each one is built with its own build.sh (lint and tests included) and its zip is
+# published as the GitHub Release <plugin>-v<version>, the version being the one in the plugin's source
+# (.github/version.sh). The release <plugin>-latest then gets the same zip under its stable name
+# (.github/update-latest.sh).
 #
-# Run it from Actions › Release, or: gh workflow run release.yml -f plugin=woocommerce
-# With publish off it only builds, and leaves the zips as a workflow artifact.
+# On a push to main — the mirror from the MPS monorepo — every plugin whose version is not released yet
+# is released; the others are left alone. So a release is: bump the version and its changelog entry in
+# MPS, merge to master.
+#
+# By hand: Actions › Release, or gh workflow run release.yml -f plugin=woocommerce. A version already
+# released is refused. With publish off it only builds, and leaves the zips as a workflow artifact.
 name: Release
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       plugin:
@@ -22,14 +28,50 @@ on:
 permissions:
   contents: write
 
-concurrency:
-  group: release-${{ inputs.plugin }}
-
 jobs:
-  release:
+  plan:
     runs-on: ubuntu-24.04
+    outputs:
+      plugins: ${{ steps.plan.outputs.plugins }}
     env:
-      PLUGIN: ${{ inputs.plugin }}
+      GH_TOKEN: ${{ github.token }}
+      INPUT_PLUGIN: ${{ inputs.plugin }}
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Which plugins to release
+        id: plan
+        run: |
+          set -euo pipefail
+          plugins=()
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]]; then
+            plugins=("$INPUT_PLUGIN")
+          else
+            for plugin in woocommerce magento prestashop odoo; do
+              tag="$plugin-v$(.github/version.sh "$plugin")"
+              if gh release view "$tag" >/dev/null 2>&1; then
+                echo "$tag is released already"
+              else
+                echo "$tag is new"
+                plugins+=("$plugin")
+              fi
+            done
+          fi
+          echo "plugins=$(jq -cn '$ARGS.positional' --args "${plugins[@]}")" >> "$GITHUB_OUTPUT"
+
+  release:
+    needs: plan
+    if: needs.plan.outputs.plugins != '[]'
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        plugin: ${{ fromJSON(needs.plan.outputs.plugins) }}
+    concurrency:
+      group: release-${{ matrix.plugin }}
+    env:
+      PLUGIN: ${{ matrix.plugin }}
+      PUBLISH: ${{ github.event_name == 'push' || inputs.publish }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -44,10 +86,8 @@ jobs:
         id: meta
         run: |
           set -euo pipefail
+          version="$(.github/version.sh "$PLUGIN")"
           cd "$PLUGIN/dist"
-          # Every versioned zip a build writes carries the same version: <name>-<version>.zip.
-          version="$(ls *.zip | sed -n 's/^.*-\([0-9][0-9.]*\)\.zip$/\1/p' | sort -u)"
-          [[ "$(wc -l <<<"$version")" == 1 && -n "$version" ]] || { echo "No single version in: $(ls)" >&2; exit 1; }
 
           # The merchant's zip only: the stable-name copy is the same file, and WooCommerce's
           # Marketplace zip is uploaded to Woo.com, not installed from here.
@@ -72,10 +112,10 @@ jobs:
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: ${{ steps.meta.outputs.tag }}
-          path: ${{ inputs.plugin }}/dist/*.zip
+          path: ${{ matrix.plugin }}/dist/*.zip
 
       - name: Publish the release
-        if: inputs.publish
+        if: env.PUBLISH == 'true'
         run: |
           set -euo pipefail
           tag="${{ steps.meta.outputs.tag }}"
@@ -90,5 +130,5 @@ jobs:
             --notes-file "$RUNNER_TEMP/notes.md"
 
       - name: Point <plugin>-latest at it
-        if: inputs.publish
+        if: env.PUBLISH == 'true'
         run: .github/update-latest.sh "$PLUGIN" "${{ steps.meta.outputs.version }}"

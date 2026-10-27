@@ -1,0 +1,226 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* payment_mps
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 20.0-20261015\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-10-22 14:29+0000\n"
+"PO-Revision-Date: 2026-10-22 14:29+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: payment_mps
+#: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
+msgid "Advanced"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_client_id
+msgid "Client ID"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_client_secret
+msgid "Client Secret"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__code
+msgid "Code"
+msgstr ""
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_provider.py:0
+msgid "Could not reach MPS."
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__display_name
+#: model:ir.model.fields,field_description:payment_mps.field_payment_transaction__display_name
+msgid "Display Name"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,help:payment_mps.field_payment_provider__mps_client_id
+msgid ""
+"From the MPS platform, under Online › Get started. A test key starts with "
+"test_."
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_gateway_url
+msgid "Gateway"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,help:payment_mps.field_payment_transaction__mps_check_count
+msgid ""
+"How many of the scheduled reads after opening the payment have been made."
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__id
+#: model:ir.model.fields,field_description:payment_mps.field_payment_transaction__id
+msgid "ID"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields.selection,name:payment_mps.selection__payment_provider__code__mps
+#: model:payment.method,name:payment_mps.payment_method_mps
+#: model:payment.provider,name:payment_mps.payment_provider_mps
+msgid "MPS"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_access_token
+msgid "MPS Access Token"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_transaction__mps_check_count
+msgid "MPS Scheduled Reads"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_is_test_key
+msgid "MPS Test Key"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_token_expiry
+msgid "MPS Token Expiry"
+msgstr ""
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid ""
+"MPS approved %(approved)s of %(requested)s %(currency)s: a partial approval."
+" Check before delivering."
+msgstr ""
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_provider.py:0
+msgid "MPS did not accept these credentials (%s)."
+msgstr ""
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid "MPS did not return a payment to send the shopper to."
+msgstr ""
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_provider.py:0
+msgid "MPS rejected the token."
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model,name:payment_mps.model_payment_provider
+msgid "Payment Provider"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.module.module,shortdesc:base.module_payment_mps
+msgid "Payment Provider: MPS"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model,name:payment_mps.model_payment_transaction
+msgid "Payment Transaction"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.actions.server,name:payment_mps.cron_check_payments_ir_actions_server
+msgid "Payment: Read Open MPS Payments"
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,help:payment_mps.field_payment_provider__mps_webhook_secret
+msgid ""
+"Shown with your key in the MPS platform. Payment notifications are only "
+"acted on when their signature matches; without a secret they are ignored and"
+" orders are settled by the module's own checks."
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.module.module,summary:base.module_payment_mps
+msgid ""
+"Take card and banking-app payments on the MPS-hosted checkout. Sends the "
+"order amount, number and return addresses to MPS (Mobile Payment Solutions)."
+msgstr ""
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid "The payment failed at MPS."
+msgstr ""
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid "The shopper left the MPS checkout without paying."
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,help:payment_mps.field_payment_provider__code
+msgid "The technical code of this payment provider."
+msgstr ""
+
+#. module: payment_mps
+#: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
+msgid ""
+"This is a test key. It works for 24 hours and accepts only the MPS test "
+"cards: no card is charged and nothing is paid out."
+msgstr ""
+
+#. module: payment_mps
+#: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
+msgid ""
+"This payment method sends the order amount, order number and your shop's "
+"return addresses to MPS (Mobile Payment Solutions) to open each payment."
+msgstr ""
+
+#. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_webhook_secret
+msgid "Webhook Signing Secret"
+msgstr ""
+
+#. module: payment_mps
+#: model_terms:payment.provider,auth_msg:payment_mps.payment_provider_mps
+msgid "Your payment has been authorized."
+msgstr ""
+
+#. module: payment_mps
+#: model_terms:payment.provider,cancel_msg:payment_mps.payment_provider_mps
+msgid "Your payment has been cancelled."
+msgstr ""
+
+#. module: payment_mps
+#: model_terms:payment.provider,pending_msg:payment_mps.payment_provider_mps
+msgid "Your payment has been processed but is waiting for approval."
+msgstr ""
+
+#. module: payment_mps
+#: model_terms:payment.provider,done_msg:payment_mps.payment_provider_mps
+msgid "Your payment has been processed."
+msgstr ""
+
+#. module: payment_mps
+#: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
+msgid "test_BE0000000000"
+msgstr ""
+
+#. module: payment_mps
+#: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
+msgid "whsec_…"
+msgstr ""

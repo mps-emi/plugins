@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- One method: the shopper picks card or banking app on the MPS checkout itself. -->
+    <record id="payment_method_mps" model="payment.method">
+        <field name="name">MPS</field>
+        <field name="code">mps</field>
+        <field name="sequence">10</field>
+        <field name="provider_id" ref="payment_provider_mps"/>
+        <field name="image" type="bytes" file="payment_mps/static/description/icon.png"/>
+        <field name="support_tokenization">False</field>
+        <field name="supported_currency_ids" eval="[Command.set([ref('base.EUR')])]"/>
+    </record>
+
+</odoo>

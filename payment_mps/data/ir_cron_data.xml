@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Reads open MPS payments again 10 min, 30 min, 1 h and 6 h after they were opened. -->
+    <record id="cron_check_payments" model="ir.cron">
+        <field name="name">Payment: Read Open MPS Payments</field>
+        <field name="model_id" ref="payment.model_payment_transaction"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_mps_check_payments()</field>
+        <field name="user_id" ref="base.user_root"/>
+        <field name="interval_number">5</field>
+        <field name="interval_type">minutes</field>
+    </record>
+
+</odoo>

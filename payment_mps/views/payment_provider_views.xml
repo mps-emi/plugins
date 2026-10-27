@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <record id="payment_provider_form" model="ir.ui.view">
+        <field name="name">payment.provider.form.inherit.mps</field>
+        <field name="model">payment.provider</field>
+        <field name="inherit_id" ref="payment.payment_provider_form"/>
+        <field name="arch" type="xml">
+            <group name="provider_credentials" position="before">
+                <field name="mps_is_test_key" invisible="1"/>
+                <div
+                    class="alert alert-warning"
+                    role="alert"
+                    colspan="2"
+                    invisible="code != 'mps' or not mps_is_test_key"
+                >
+                    This is a test key. It works for 24 hours and accepts only the MPS test cards: no card is charged and nothing is paid out.
+                </div>
+            </group>
+            <group name="provider_credentials" position="inside">
+                <field
+                    name="mps_client_id"
+                    invisible="code != 'mps'"
+                    required="code == 'mps' and is_live"
+                    placeholder="test_BE0000000000"
+                />
+                <field
+                    name="mps_client_secret"
+                    invisible="code != 'mps'"
+                    required="code == 'mps' and is_live"
+                    widget="password"
+                />
+                <div class="text-muted" colspan="2" invisible="code != 'mps'">
+                    This payment method sends the order amount, order number and your shop's return addresses to MPS (Mobile Payment Solutions) to open each payment.
+                </div>
+            </group>
+            <group name="provider_credentials" position="after">
+                <group string="Advanced" name="mps_advanced" invisible="code != 'mps'">
+                    <field name="mps_webhook_secret" widget="password" placeholder="whsec_…"/>
+                    <field name="mps_gateway_url"/>
+                </group>
+            </group>
+        </field>
+    </record>
+
+</odoo>

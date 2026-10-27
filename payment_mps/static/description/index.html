@@ -1,0 +1,143 @@
+<!--
+  The app's page on the Odoo Apps Store. The store's rules: English; Bootstrap 4 classes and inline color, font,
+  margin, padding and border styles only; no scripts; no links to other websites (mailto and YouTube aside);
+  images from this folder. Screenshots come from dev/check.sh through apps-store/build.sh.
+-->
+<section class="container" style="padding: 32px 16px 8px;">
+  <div class="row">
+    <div class="col-md-12 text-center">
+      <h1 style="color: #0E3F78; font-weight: 400; margin-bottom: 8px;">MPS Payments for Odoo eCommerce</h1>
+      <h4 style="color: #1C72C4; font-weight: 300; margin-bottom: 24px;">
+        Card and banking-app payments on the secure MPS checkout, confirmed on what MPS reports
+      </h4>
+      <p class="lead" style="color: #3b4a5a; max-width: 760px; margin: 0 auto;">
+        Adds MPS, the Belgian payment institution, as a payment provider. At checkout the shopper is sent to the
+        MPS payment page, pays by card or with their banking app, and comes back to your shop. Card details are
+        entered on the MPS page only and never reach your Odoo database.
+      </p>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="padding: 24px 16px;">
+  <div class="row">
+    <div class="col-md-6" style="margin-bottom: 16px;">
+      <div style="border: 1px solid #dbe3ec; border-radius: 10px; padding: 20px; height: 100%;">
+        <h4 style="color: #0E3F78; font-weight: 400;">Orders confirmed on what MPS reports</h4>
+        <p style="margin: 0;">A transaction is confirmed only once MPS says the payment arrived, never because the
+          shopper came back to the shop. A partial approval stays pending, with a message, so nothing is
+          delivered unpaid.</p>
+      </div>
+    </div>
+    <div class="col-md-6" style="margin-bottom: 16px;">
+      <div style="border: 1px solid #dbe3ec; border-radius: 10px; padding: 20px; height: 100%;">
+        <h4 style="color: #0E3F78; font-weight: 400;">No webhook to set up</h4>
+        <p style="margin: 0;">The module sends its own notification address with every payment. Paste the webhook
+          signing secret and transactions are confirmed the moment the payment arrives; without it, the module
+          reads the payment itself for six hours.</p>
+      </div>
+    </div>
+    <div class="col-md-6" style="margin-bottom: 16px;">
+      <div style="border: 1px solid #dbe3ec; border-radius: 10px; padding: 20px; height: 100%;">
+        <h4 style="color: #0E3F78; font-weight: 400;">Test before you go live</h4>
+        <p style="margin: 0;">A test key from the MPS platform runs the whole checkout with the MPS test cards. No
+          card is charged and nothing is paid out. The provider form says when a test key is in use.</p>
+      </div>
+    </div>
+    <div class="col-md-6" style="margin-bottom: 16px;">
+      <div style="border: 1px solid #dbe3ec; border-radius: 10px; padding: 20px; height: 100%;">
+        <h4 style="color: #0E3F78; font-weight: 400;">Dutch, French and English</h4>
+        <p style="margin: 0;">The provider settings and the messages shoppers see in your shop are translated
+          into Dutch and French.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="padding: 24px 16px;">
+  <h3 class="text-center" style="color: #0E3F78; font-weight: 400; margin-bottom: 24px;">How it looks</h3>
+  <div class="row">
+    <div class="col-md-12" style="margin-bottom: 32px;">
+      <p class="text-center" style="font-size: 18px;">The shopper picks MPS at the payment step of the checkout.</p>
+      <img src="screenshot_checkout.png" class="img-fluid" alt="MPS at the payment step of the checkout"
+        style="border: 1px solid #dbe3ec; border-radius: 10px;">
+    </div>
+    <div class="col-md-12" style="margin-bottom: 32px;">
+      <p class="text-center" style="font-size: 18px;">They pay on the MPS page and are back on the order
+        confirmation.</p>
+      <img src="screenshot_confirmation.png" class="img-fluid" alt="The order confirmation after paying"
+        style="border: 1px solid #dbe3ec; border-radius: 10px;">
+    </div>
+    <div class="col-md-12" style="margin-bottom: 32px;">
+      <p class="text-center" style="font-size: 18px;">The provider takes a client ID and secret from the MPS
+        platform, and says when it is a test key.</p>
+      <img src="screenshot_settings.png" class="img-fluid" alt="The MPS provider settings"
+        style="border: 1px solid #dbe3ec; border-radius: 10px;">
+    </div>
+    <div class="col-md-12" style="margin-bottom: 32px;">
+      <p class="text-center" style="font-size: 18px;">Each transaction carries its MPS payment reference.</p>
+      <img src="screenshot_transaction.png" class="img-fluid" alt="A confirmed transaction with its MPS reference"
+        style="border: 1px solid #dbe3ec; border-radius: 10px;">
+    </div>
+  </div>
+</section>
+
+<section class="container" style="padding: 24px 16px;">
+  <div class="row">
+    <div class="col-md-6" style="margin-bottom: 24px;">
+      <h3 style="color: #0E3F78; font-weight: 400;">Set up</h3>
+      <ol style="padding-left: 20px;">
+        <li>Install the module, then open Website › Configuration › Payment Providers › MPS (or the same menu
+          under Invoicing).</li>
+        <li>On the Configuration tab, paste the client ID and client secret from the MPS platform (Online ›
+          Get started), and the webhook signing secret shown with them.</li>
+        <li>Tick Live and save. Saving checks the key with MPS and refuses one MPS does not accept.</li>
+        <li>Publish the provider. MPS is offered at checkout for orders in euro.</li>
+      </ol>
+      <p>A client ID starting with <code>test_</code> is a test key: it works for 24 hours and accepts only the MPS
+        test cards. Replace it with your live key to take real payments.</p>
+    </div>
+    <div class="col-md-6" style="margin-bottom: 24px;">
+      <h3 style="color: #0E3F78; font-weight: 400;">Requirements</h3>
+      <ul style="padding-left: 20px;">
+        <li>An MPS merchant account with online payments. MPS charges its transaction fees under your MPS
+          merchant agreement; the module itself is free.</li>
+        <li>Odoo 20, Community or Enterprise, on your own server or on Odoo.sh. Odoo Online does not install
+          modules from the Apps Store.</li>
+        <li>The eCommerce, Invoicing or another app with online payments, and orders in euro.</li>
+      </ul>
+      <h3 style="color: #0E3F78; font-weight: 400; margin-top: 24px;">Good to know</h3>
+      <ul style="padding-left: 20px;">
+        <li>Refunds are made in MPS, not from Odoo.</li>
+        <li>Saved cards and payment tokens are not supported: the shopper pays on the MPS page each time.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section class="container" style="padding: 24px 16px 40px;">
+  <div style="background-color: #F6F9FC; border: 1px solid #dbe3ec; border-radius: 10px; padding: 24px;">
+    <h3 style="color: #0E3F78; font-weight: 400;">An external service, and what it is sent</h3>
+    <p>This module connects your database to the MPS payment gateway, operated by Mobile Payment Solutions NV
+      (Belgium), a payment institution licensed by the National Bank of Belgium. Nothing is sent until you enter
+      your MPS credentials and save the provider.</p>
+    <p>From then on, the module sends MPS:</p>
+    <ul style="padding-left: 20px;">
+      <li>your client ID and secret, to obtain an access token;</li>
+      <li>for each payment: the amount, the Odoo transaction reference (for example S00012), and your shop's
+        return and notification addresses;</li>
+      <li>the MPS payment reference, to read back whether that payment was made.</li>
+    </ul>
+    <p style="margin-bottom: 0;">No customer name, address, e-mail or card number is sent by the module. The
+      shopper enters their payment details on the MPS page, where MPS processes them under its own privacy
+      policy and your MPS merchant agreement.</p>
+  </div>
+</section>
+
+<section class="container" style="padding: 0 16px 40px;">
+  <div class="text-center">
+    <h3 style="color: #0E3F78; font-weight: 400;">Support</h3>
+    <p style="margin-bottom: 0;">Questions about the module or your MPS account:
+      <a href="mailto:ict@mps-emi.com" style="color: #1C72C4;">ict@mps-emi.com</a></p>
+  </div>
+</section>

@@ -116,6 +116,3 @@ Not on Odoo Online: the odoo.com SaaS does not allow uploading addons.
 Each folder holds a plugin's source; `./build.sh` in it lints, tests and builds the zip into `dist/` (it
 needs docker or podman, and zip). A push to `main` releases every plugin whose version has no release
 yet, and points `<plugin>-latest` at it.
-
-This repository is a mirror: the plugins are developed in the MPS repository and copied here, so a change
-made directly here is overwritten by the next copy.

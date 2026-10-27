@@ -1,0 +1,37 @@
+<!doctype html>
+<!-- The Apps Store cover (payment_mps/static/description/banner.png), rendered by apps-store/build.sh at 1500 × 750:
+     the app's thumbnail in the listing and the banner on its page. The image is the payment step dev/check.sh
+     photographed, cropped to MPS at the checkout. Brand colours from the MPS design system. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  html, body { margin: 0; width: 1500px; height: 750px; overflow: hidden; }
+  body {
+    font-family: 'Lexend', system-ui, sans-serif; font-weight: 300; color: #fff;
+    background: radial-gradient(circle at 85% 20%, rgba(41, 194, 236, .35), transparent 45%),
+                linear-gradient(135deg, #1C72C4 0%, #0E3F78 100%);
+    display: flex; align-items: center; gap: 70px; padding: 0 90px; box-sizing: border-box;
+  }
+  .text { flex: 0 0 560px; }
+  .logo { width: 120px; height: 120px; background: #fff; border-radius: 24px; display: flex; align-items: center; justify-content: center; }
+  .logo img { width: 96px; }
+  h1 { font-weight: 400; font-size: 64px; line-height: 1.08; margin: 44px 0 24px; letter-spacing: -.01em; }
+  p { font-size: 28px; line-height: 1.4; margin: 0; color: #DCEBFA; }
+  .tag { display: inline-block; margin-top: 36px; padding: 10px 22px; border: 2px solid #29C2EC; border-radius: 50px; font-size: 22px; font-weight: 400; color: #fff; }
+  .shot { flex: 1; height: 350px; border-radius: 16px; overflow: hidden; box-shadow: 0 30px 80px rgba(4, 24, 52, .55); background: #fff; }
+  /* The payment step's left column at 66 %: MPS selected, "Secured by MPS", the billing address. */
+  .shot img { display: block; width: 1267px; margin: -108px 0 0 -48px; }
+</style>
+</head>
+<body>
+  <div class="text">
+    <div class="logo"><img src="ICON" alt=""></div>
+    <h1>MPS payments for Odoo eCommerce</h1>
+    <p>Card and banking-app payments on the secure MPS checkout, confirmed on what MPS reports.</p>
+    <span class="tag">Odoo 20 · Free</span>
+  </div>
+  <div class="shot"><img src="CHECKOUT" alt=""></div>
+</body>
+</html>

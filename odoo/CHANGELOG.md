@@ -2,6 +2,11 @@
 
 `build.sh` refuses to build a version without an entry here.
 
+## 20.0.1.0.0
+
+- First release on the Odoo Apps Store. The module is unchanged from 20.0.0.1.0; the store page now names
+  the support address, ict@mps-emi.com.
+
 ## 20.0.0.1.0
 
 - First release for Odoo 20: MPS as a payment provider on the MPS-hosted checkout, settled from the

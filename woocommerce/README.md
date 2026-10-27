@@ -44,26 +44,27 @@ paid or failed exactly as live. It works for 24 hours; the plugin says so when t
 
 ## Build and publish
 
-Releases go through the CD pipeline once it is switched on: `src/Pipelines/cd.yml` builds and publishes
-the plugins when its `pluginsEnabled` variable is `'true'` — **off for now**, since the staging service
-connection it needs (`WWD01UD-SUB0001`) does not exist yet. It runs this build and uploads `dist/` to
-`<plugins base URL>/woocommerce/` on the CDN —
-staging first, production after the approval (`templates/publish_plugins.yml`). A version already
-published is kept, so bump the version first. The steps below are what it does, for a manual one-off.
+Releases go through CD - MPS (`src/Pipelines/cd.yml`, parameter `deploy_plugins`): it builds and tests
+the plugins, and after the Production approval publishes them to github.com/mps-emi/plugins, whose
+Release workflow releases each plugin whose version is new as `<plugin>-v<version>` and
+`<plugin>-latest` — the address the docs link to (`../README.md`). CI - MPS refuses a pull request that
+changes `mps-payments/` without raising the version and its `readme.txt` changelog entry
+(`../check-plugin-versions.sh`), so every merged change is a release.
 
 ```bash
-PLUGIN_BASE_URL=https://<cdn-host>/woocommerce ./build.sh
+./build.sh      # what the release runs, to try it locally
 ```
 
-Upload `mps-payments-<version>.zip`, `mps-payments.zip` and `info.json` from `dist/` to that folder.
-Upload `mps-payments-<version>.zip` before `info.json`: installed copies read `info.json` and download
-the zip it names straight away.
+The release is built without `PLUGIN_BASE_URL`, so its zip has no update URL and never loads the updater:
+a merchant who installed from the zip updates by uploading the new one (WordPress offers **Replace current
+with uploaded**). `PLUGIN_BASE_URL` stamps an update folder in for a copy published somewhere that serves
+`info.json` beside the zips; nothing publishes one today.
 
 The build also writes `mps-payments-marketplace-<version>.zip`, the upload for the WooCommerce
 Marketplace. It is the same plugin without `includes/class-mps-payments-updater.php` and with
 `MPS_PAYMENTS_UPDATE_URL` left empty, whatever `PLUGIN_BASE_URL` was: Woo.com delivers updates to
-Marketplace installs, and the Marketplace rules forbid a second update source. It is not uploaded to
-the CDN; submit it in the Woo.com vendor dashboard.
+Marketplace installs, and the Marketplace rules forbid a second update source. It is not released on
+GitHub; submit it in the Woo.com vendor dashboard.
 
 Before a Marketplace submission, rehearse what its automated tests (QIT) check, and write the listing files:
 

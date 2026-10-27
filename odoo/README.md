@@ -57,20 +57,20 @@ Refunds are not supported (`support_refund` stays `none`): refund the payment th
 
 ## Build and publish
 
-Releases go through the CD pipeline once it is switched on: `src/Pipelines/cd.yml` builds and publishes
-the plugins when its `pluginsEnabled` variable is `'true'` — **off for now**, since the staging service
-connection it needs (`WWD01UD-SUB0001`) does not exist yet. It runs this build and uploads `dist/` to
-`<plugins base URL>/odoo/` on the CDN —
-staging first, production after the approval (`templates/publish_plugins.yml`). A version already
-published is kept, so bump the version first. The steps below are what it does, for a manual one-off.
+Releases go through CD - MPS (`src/Pipelines/cd.yml`, parameter `deploy_plugins`): it builds and tests
+the plugins, and after the Production approval publishes them to github.com/mps-emi/plugins, whose
+Release workflow releases each plugin whose version is new as `<plugin>-v<version>` and
+`<plugin>-latest` — the address the docs link to (`../README.md`). CI - MPS refuses a pull request that
+changes `payment_mps/` without raising the version and its changelog entry
+(`../check-plugin-versions.sh`), so every merged change is a release.
 
 ```bash
-./build.sh
+./build.sh      # what the release runs, to try it locally
 ```
 
-Upload `dist/payment_mps-<version>.zip` and `dist/payment_mps.zip` (the stable name the docs link to)
-to the same folder. Odoo has no update channel for an uploaded addon: a merchant uploads the new zip
-and upgrades the module.
+Odoo has no update channel for an uploaded addon: a merchant uploads the new zip and upgrades the
+module. The Apps Store picks the new version up from the branch `20.0`, which the same Release workflow
+pushes (`apps-store/listing.md`).
 
 Before releasing: bump `version` in `payment_mps/__manifest__.py` (Odoo convention:
 `20.0.<major>.<minor>.<patch>`) and add a `## <version>` entry to `CHANGELOG.md` — the build refuses a

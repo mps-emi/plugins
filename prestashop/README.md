@@ -65,19 +65,18 @@ they will live. It works for 24 hours; the module says so when the key is saved.
 
 ## Build and publish
 
-Releases go through the CD pipeline once it is switched on: `src/Pipelines/cd.yml` builds and publishes
-the plugins when its `pluginsEnabled` variable is `'true'` — **off for now**, since the staging service
-connection it needs (`WWD01UD-SUB0001`) does not exist yet. It runs this build and uploads `dist/` to
-`<plugins base URL>/prestashop/` on the CDN —
-staging first, production after the approval (`templates/publish_plugins.yml`). A version already
-published is kept, so bump the version first. The steps below are what it does, for a manual one-off.
+Releases go through CD - MPS (`src/Pipelines/cd.yml`, parameter `deploy_plugins`): it builds and tests
+the plugins, and after the Production approval publishes them to github.com/mps-emi/plugins, whose
+Release workflow releases each plugin whose version is new as `<plugin>-v<version>` and
+`<plugin>-latest` — the address the docs link to (`../README.md`). CI - MPS refuses a pull request that
+changes `mpspayments/` without raising the version and its changelog entry
+(`../check-plugin-versions.sh`), so every merged change is a release.
 
 ```bash
-./build.sh
+./build.sh      # what the release runs, to try it locally
 ```
 
-Upload `dist/mpspayments-<version>.zip` and `dist/mpspayments.zip` to the folder `PRESTASHOP_PLUGIN_URL`
-(docs site) points at. PrestaShop has no self-update for modules from outside its marketplace: a merchant
+PrestaShop has no self-update for modules from outside its marketplace: a merchant
 updates by uploading the new zip in Module Manager, which runs the upgrade.
 
 The zip holds an `index.php` in every folder and the AFL-3.0 header on every `.php` and `.tpl`, as the

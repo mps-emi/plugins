@@ -25,12 +25,15 @@ on:
         type: boolean
         default: true
 
-permissions:
-  contents: write
+# Nothing by default: each job asks for what it uses. Only release writes: the GitHub Release, and for Odoo
+# the Apps Store branch.
+permissions: {}
 
 jobs:
   plan:
     runs-on: ubuntu-24.04
+    permissions:
+      contents: read
     outputs:
       plugins: ${{ steps.plan.outputs.plugins }}
     env:
@@ -38,6 +41,9 @@ jobs:
       INPUT_PLUGIN: ${{ inputs.plugin }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Releases go through gh and GH_TOKEN; nothing pushes with git, so the token is not left in .git.
+          persist-credentials: false
 
       - name: Which plugins to release
         id: plan
@@ -63,6 +69,8 @@ jobs:
     needs: plan
     if: needs.plan.outputs.plugins != '[]'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     strategy:
       fail-fast: false
       matrix:
@@ -75,6 +83,9 @@ jobs:
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # Releases go through gh and GH_TOKEN; nothing pushes with git, so the token is not left in .git.
+          persist-credentials: false
 
       - name: Build
         # Odoo's tests run in a pod, which only podman has; the others use docker.
@@ -132,3 +143,8 @@ jobs:
       - name: Point <plugin>-latest at it
         if: env.PUBLISH == 'true'
         run: .github/update-latest.sh "$PLUGIN" "${{ steps.meta.outputs.version }}"
+
+      - name: Push the Odoo module to the Apps Store branch
+        # The Odoo Apps Store scans the branch named after the Odoo series (20.0), not a release.
+        if: env.PUBLISH == 'true' && matrix.plugin == 'odoo'
+        run: .github/push-apps-store.sh "${{ steps.meta.outputs.version }}"

@@ -67,21 +67,19 @@ as declared in `mps-payments/composer.json`. The shop's currency must be EUR.
 
 ## Build and publish
 
-Releases go through the CD pipeline once it is switched on: `src/Pipelines/cd.yml` builds and publishes
-the plugins when its `pluginsEnabled` variable is `'true'` — **off for now**, since the staging service
-connection it needs (`WWD01UD-SUB0001`) does not exist yet. It runs this build and uploads `dist/` to
-`<plugins base URL>/magento/` on the CDN —
-staging first, production after the approval (`templates/publish_plugins.yml`). A version already
-published is kept, so bump the version first. The steps below are what it does, for a manual one-off.
+Releases go through CD - MPS (`src/Pipelines/cd.yml`, parameter `deploy_plugins`): it builds and tests
+the plugins, and after the Production approval publishes them to github.com/mps-emi/plugins, whose
+Release workflow releases each plugin whose version is new as `<plugin>-v<version>` and
+`<plugin>-latest` — the address the docs link to (`../README.md`). CI - MPS refuses a pull request that
+changes `mps-payments/` without raising the version and its changelog entry
+(`../check-plugin-versions.sh`), so every merged change is a release.
 
 ```bash
-./build.sh
+./build.sh      # what the release runs, to try it locally
 ```
 
-Upload `dist/mps-module-payments-<version>.zip` and `dist/mps-module-payments.zip` to the folder
-`MAGENTO_PLUGIN_URL` (docs site) points at. Magento has no self-update for modules installed from a zip,
-so there is no `info.json`: a merchant updates by installing the new zip the same way, or by
-`composer update` when installed as a Composer artifact.
+Magento has no self-update for modules installed from a zip: a merchant updates by installing the new zip
+the same way, or by `composer update` when installed as a Composer artifact.
 
 Before releasing: bump `version` in `mps-payments/composer.json` and add a `## <version>` entry to
 `CHANGELOG.md` (the build refuses a version without one). When strings change, add them to every file in

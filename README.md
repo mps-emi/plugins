@@ -115,4 +115,5 @@ Not on Odoo Online: the odoo.com SaaS does not allow uploading addons.
 
 Each folder holds a plugin's source; `./build.sh` in it lints, tests and builds the zip into `dist/` (it
 needs docker or podman, and zip). A push to `main` releases every plugin whose version has no release
-yet, and points `<plugin>-latest` at it.
+yet, and points `<plugin>-latest` at it. A new Odoo release is also pushed to the branch `20.0`, which holds only
+the `payment_mps` module: the branch the Odoo Apps Store lists it from.

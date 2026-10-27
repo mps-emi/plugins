@@ -1,2 +1,4 @@
 dist/
 __pycache__/
+dev/browser/node_modules/
+dev/browser/package-lock.json

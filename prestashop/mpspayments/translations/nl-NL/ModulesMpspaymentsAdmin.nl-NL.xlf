@@ -14,9 +14,9 @@
         <source>MPS did not accept these credentials: %reason%</source>
         <target>MPS heeft deze gegevens niet aanvaard: %reason%</target>
       </trans-unit>
-      <trans-unit id="b2c878a7b703faed2e1eeab2589d5c99">
-        <source>Connected to MPS with a test key. It works for 24 hours and accepts only the MPS test cards; no card is charged.</source>
-        <target>Verbonden met MPS met een testsleutel. Die werkt 24 uur en aanvaardt enkel de testkaarten van MPS; er wordt geen kaart gedebiteerd.</target>
+      <trans-unit id="360d89e2ec2e0f138e9c05c95c18ce25">
+        <source>Connected to MPS with a test key. It accepts only the MPS test cards; no card is charged.</source>
+        <target>Verbonden met MPS met een testsleutel. Die aanvaardt enkel de testkaarten van MPS; er wordt geen kaart gedebiteerd.</target>
       </trans-unit>
       <trans-unit id="122738e00ea14387e32582757c5f609a">
         <source>Connected to MPS.</source>
@@ -50,17 +50,17 @@
         <source>MPS Payments needs the PHP curl extension. Ask your host to enable it, then install the module again.</source>
         <target>MPS Payments heeft de PHP-extensie curl nodig. Vraag uw hostingprovider die in te schakelen en installeer de module daarna opnieuw.</target>
       </trans-unit>
-      <trans-unit id="76525f0f34b48475e5ca33f71d296f3b">
-        <source>Client ID</source>
-        <target>Client-ID</target>
+      <trans-unit id="656a6828d7ef1bb791e42087c4b5ee6e">
+        <source>API key</source>
+        <target>API-sleutel</target>
       </trans-unit>
-      <trans-unit id="7e2122887831fe7d54cb7ea0d6230528">
-        <source>Paste the client ID, secret and webhook signing secret from the MPS platform (Online › Get started). A test key, whose client ID starts with test_, works for 24 hours and accepts only the MPS test cards: no card is charged and nothing is paid out.</source>
-        <target>Plak de client-ID, het clientgeheim en het ondertekeningsgeheim voor webhooks uit het MPS-platform (Online › Aan de slag). Een testsleutel, waarvan de client-ID met test_ begint, werkt 24 uur en aanvaardt enkel de testkaarten van MPS: er wordt geen kaart gedebiteerd en niets uitbetaald.</target>
+      <trans-unit id="0d2c8997c7b2115956634ded723f2e3d">
+        <source>Paste the API key and the webhook signing secret from the MPS platform (Online › Get started). A test key, which starts with mps_test_, accepts only the MPS test cards: no card is charged and nothing is paid out.</source>
+        <target>Plak de API-sleutel en het ondertekeningsgeheim voor webhooks uit het MPS-platform (Online › Aan de slag). Een testsleutel, die met mps_test_ begint, aanvaardt enkel de testkaarten van MPS: er wordt geen kaart gedebiteerd en niets uitbetaald.</target>
       </trans-unit>
-      <trans-unit id="1b4739e491387ef5d8a546854308e5fe">
-        <source>Client secret</source>
-        <target>Clientgeheim</target>
+      <trans-unit id="b5e30dab9504981f7bb23a17ee288604">
+        <source>Not configured: MPS is not offered at checkout until an API key is saved. Paste it from the MPS platform (Online › Get started). A client ID and secret are no longer used.</source>
+        <target>Niet ingesteld: MPS wordt pas aangeboden bij het afrekenen als er een API-sleutel is opgeslagen. Plak die uit het MPS-platform (Online › Aan de slag). Een client-ID en clientgeheim worden niet meer gebruikt.</target>
       </trans-unit>
       <trans-unit id="6b2bed9c2c8c8248278917caae31ea82">
         <source>Saved. Leave empty to keep it.</source>
@@ -117,6 +117,54 @@
       <trans-unit id="0842d6d45c1112f4394b124cff9da47c">
         <source>MPS approved %approved% of %expected% (payment %ref%). Check before shipping.</source>
         <target>MPS keurde %approved% van %expected% goed (betaling %ref%). Controleer dit vóór verzending.</target>
+      </trans-unit>
+      <trans-unit id="443fb3030983fcc933ba8f33caf3018f">
+        <source>MPS refunded %amount% (refund %refund%).</source>
+        <target>MPS heeft %amount% terugbetaald (terugbetaling %refund%).</target>
+      </trans-unit>
+      <trans-unit id="03ff1b59bf4d7926e9d8c2e792998ad6">
+        <source>MPS refund %refund% of %amount% is being processed. It is sent after %until%; until then you can cancel it in MPS.</source>
+        <target>MPS-terugbetaling %refund% van %amount% wordt verwerkt. Ze wordt verstuurd na %until%; tot dan kunt u ze in MPS annuleren.</target>
+      </trans-unit>
+      <trans-unit id="735e4444dc2ba62d8da6a70cd2fee623">
+        <source>MPS refund %refund% of %amount% is being processed; its outcome is in MPS.</source>
+        <target>MPS-terugbetaling %refund% van %amount% wordt verwerkt; het resultaat staat in MPS.</target>
+      </trans-unit>
+      <trans-unit id="3e8582585c77120b3569457d8c4597fc">
+        <source>MPS refused refund %refund% of %amount% (%reason%). Nothing was paid back to the customer.</source>
+        <target>MPS heeft terugbetaling %refund% van %amount% geweigerd (%reason%). Er werd niets aan de klant terugbetaald.</target>
+      </trans-unit>
+      <trans-unit id="f185ae2875706e3c72cf4c617ac90d65">
+        <source>MPS did not refund %amount% of payment %payment% (%reason%). Nothing was paid back to the customer.</source>
+        <target>MPS heeft %amount% van betaling %payment% niet terugbetaald (%reason%). Er werd niets aan de klant terugbetaald.</target>
+      </trans-unit>
+      <trans-unit id="4e7fad8a73f94a21aaf0833480e59cd9">
+        <source>MPS did not refund %amount%: the API key may not refund (payments:refund). A live key may only once MPS granted it: ask MPS. A test key always may. Nothing was paid back to the customer.</source>
+        <target>MPS heeft %amount% niet terugbetaald: de API-sleutel mag niet terugbetalen (payments:refund). Een live sleutel mag dat pas als MPS het toegekend heeft: vraag het aan MPS. Een testsleutel mag het altijd. Er werd niets aan de klant terugbetaald.</target>
+      </trans-unit>
+      <trans-unit id="b684e442963399f0270267b80e1e20f6">
+        <source>MPS did not refund %amount%: it knows no payment %payment% for this API key (a test key cannot refund a live payment, nor a live key a test one). Nothing was paid back to the customer.</source>
+        <target>MPS heeft %amount% niet terugbetaald: het kent geen betaling %payment% voor deze API-sleutel (een testsleutel kan geen live betaling terugbetalen, en een live sleutel geen testbetaling). Er werd niets aan de klant terugbetaald.</target>
+      </trans-unit>
+      <trans-unit id="a3f56ab1f302020d071f1ffb94ef87ff">
+        <source>MPS did not refund %amount% of payment %payment%: the payment is not executed yet, or MPS was busy with it. Nothing was paid back to the customer; refund it in MPS.</source>
+        <target>MPS heeft %amount% van betaling %payment% niet terugbetaald: de betaling is nog niet uitgevoerd, of MPS was er al mee bezig. Er werd niets aan de klant terugbetaald; betaal terug in MPS.</target>
+      </trans-unit>
+      <trans-unit id="3fe714a64cbb1cac34be40ba50f1438e">
+        <source>The refund of %amount% of payment %payment% has no answer from MPS (%reason%). Check in MPS whether it was refunded before refunding it again.</source>
+        <target>De terugbetaling van %amount% van betaling %payment% kreeg geen antwoord van MPS (%reason%). Controleer in MPS of ze werd terugbetaald voordat u opnieuw terugbetaalt.</target>
+      </trans-unit>
+      <trans-unit id="ff9c2078c60ab30f83f89a7cc4d44075">
+        <source>No MPS refund for this credit slip: a voucher was generated instead.</source>
+        <target>Geen MPS-terugbetaling voor deze creditnota: er werd in de plaats een tegoedbon aangemaakt.</target>
+      </trans-unit>
+      <trans-unit id="a2f8ad74e36fe51a67a4a6d4fc5152af">
+        <source>No MPS refund for this credit slip: no paid MPS payment was found for this order. Refund the customer in MPS.</source>
+        <target>Geen MPS-terugbetaling voor deze creditnota: er werd geen betaalde MPS-betaling gevonden voor deze bestelling. Betaal de klant terug in MPS.</target>
+      </trans-unit>
+      <trans-unit id="696a2d9bc558cb9906a3af2234353480">
+        <source>No MPS refund for this credit slip: its tax-included amount is not on it (prices shown tax excluded, with a chosen amount or a voucher deducted). Refund the customer in MPS.</source>
+        <target>Geen MPS-terugbetaling voor deze creditnota: het bedrag inclusief btw staat er niet op (prijzen exclusief btw getoond, met een gekozen bedrag of een afgetrokken tegoedbon). Betaal de klant terug in MPS.</target>
       </trans-unit>
     </body>
   </file>

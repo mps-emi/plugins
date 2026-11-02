@@ -1,6 +1,6 @@
 {
     "name": "Payment Provider: MPS",
-    "version": "20.0.1.0.0",
+    "version": "20.0.2.0.0",
     "category": "Accounting/Payment Providers",
     "sequence": 350,
     "summary": "Take card and banking-app payments on the MPS-hosted checkout."

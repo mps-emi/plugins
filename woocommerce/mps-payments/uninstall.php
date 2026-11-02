@@ -11,6 +11,7 @@ defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
 delete_option( 'woocommerce_mps_payments_settings' );
 delete_site_transient( 'mps_payments_update_info' );
 
+// Tokens cached by versions before 1.0.0, should the shop never have run the upgrade that deletes them.
 global $wpdb;
 $wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_mps\\_payments\\_token\\_%' OR option_name LIKE '\\_transient\\_timeout\\_mps\\_payments\\_token\\_%'" ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
 

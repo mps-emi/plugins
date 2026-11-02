@@ -14,7 +14,7 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 /**
- * Whether a value may be saved as the gateway URL: an absolute HTTPS URL. The client secret is sent there,
+ * Whether a value may be saved as the gateway URL: an absolute HTTPS URL. The API key is sent there,
  * so anything else is refused on the settings page and the stored value kept.
  */
 if (!defined('_PS_VERSION_')) {

@@ -42,8 +42,13 @@ class PaymentStarter
             $body['callbackUrl'] = $callbackUrl;
         }
 
+        // An order placed before the module made keys gets one now; it is saved with the opened payment.
+        $payment = $order->getPayment();
+        $idempotencyKey = (string) $payment->getAdditionalInformation(PaymentInfo::IDEMPOTENCY_KEY) ?: PaymentInfo::idempotencyKey((string) $order->getIncrementId());
+        $payment->setAdditionalInformation(PaymentInfo::IDEMPOTENCY_KEY, $idempotencyKey);
+
         try {
-            $created = $this->api->createPayment($body, (int) $order->getStoreId());
+            $created = $this->api->createPayment($body, $idempotencyKey, (int) $order->getStoreId());
         } catch (\Exception $e) {
             throw new LocalizedException(__('MPS could not open a payment. Enable the debug log for details.'), $e);
         }
@@ -53,7 +58,6 @@ class PaymentStarter
         }
 
         $reference = (string) $created['paymentReference'];
-        $payment = $order->getPayment();
         $payment->setLastTransId($reference);
         $payment->setAdditionalInformation(PaymentInfo::REFERENCE, $reference);
         $payment->setAdditionalInformation(PaymentInfo::OPENED_AT, time());

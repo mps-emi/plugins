@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Runs the addon's tests in a throwaway Odoo + PostgreSQL pod: installs payment_mps into an empty
-# database and runs every test tagged for it. Exits non-zero when any test fails or errors.
+# database, with account_payment (whose Refund button a shop uses), and runs every test tagged for it.
+# Exits non-zero when any test fails or errors.
 #
 #   ./test.sh
 #
@@ -30,7 +31,7 @@ log="$(mktemp)"
 "$cli" run --rm --pod "$pod" -e HOST=127.0.0.1 -e USER=odoo -e PASSWORD=odoo \
   -v "$here/payment_mps:/mnt/extra-addons/payment_mps:ro" "$odoo_image" \
   odoo -d mps_test \
-  -i payment_mps --test-tags /payment_mps --stop-after-init --log-level=test 2>&1 | tee "$log" \
+  -i payment_mps,account_payment --test-tags /payment_mps --stop-after-init --log-level=test 2>&1 | tee "$log" \
   | grep -E "(ERROR|FAIL|Ran [0-9]+ tests|tests? (failed|passed)|payment_mps: )" || true
 
 if grep -qE " (ERROR|CRITICAL) " "$log" || ! grep -qE "payment_mps: [0-9]+ tests" "$log"; then

@@ -1,6 +1,6 @@
 <?php
 /**
- * The MPS payments gateway, as this plugin uses it: a token, create an internet payment, read it back.
+ * The MPS payments gateway, as this plugin uses it: create an internet payment, read it back, refund it.
  *
  * @package MpsPayments
  */
@@ -11,11 +11,19 @@ defined( 'ABSPATH' ) || exit;
  * A small client for the gateway's published internet-payment surface.
  *
  * Everything else about the merchant — which wallet, which shop name the shopper sees — comes from the
- * credentials, never from a request, so there is nothing here to configure beyond them.
+ * API key, never from a request, so there is nothing here to configure beyond it.
  */
 class Mps_Payments_Api {
 
-	const SCOPES = 'internet:create internet:read';
+	/**
+	 * What an API key starts with: mps_live_ or mps_test_, then its key id and its secret.
+	 */
+	const TEST_API_KEY_PREFIX = 'mps_test_';
+
+	/**
+	 * A payment reference no payment has, read to prove an API key: MPS answers 404 to a key it accepts.
+	 */
+	const CREDENTIAL_CHECK_REFERENCE = 'mps-credential-check';
 
 	/**
 	 * The gateway, without a trailing slash.
@@ -25,18 +33,11 @@ class Mps_Payments_Api {
 	private $base_url;
 
 	/**
-	 * The API client id.
+	 * The API key, sent as the bearer on every call.
 	 *
 	 * @var string
 	 */
-	private $client_id;
-
-	/**
-	 * Its secret.
-	 *
-	 * @var string
-	 */
-	private $client_secret;
+	private $api_key;
 
 	/**
 	 * Receives ( message, level ), or null when nothing is logged.
@@ -46,29 +47,28 @@ class Mps_Payments_Api {
 	private $log;
 
 	/**
-	 * A client for one key on one gateway.
+	 * A client for one API key on one gateway.
 	 *
-	 * @param string        $base_url      The gateway, e.g. https://gateway.mps-emi.com.
-	 * @param string        $client_id     The API client id (a test key's starts with test_).
-	 * @param string        $client_secret Its secret.
-	 * @param callable|null $log           Receives ( message, level ) to log, or null for none.
+	 * @param string        $base_url The gateway, e.g. https://gateway.mps-emi.com.
+	 * @param string        $api_key  The API key (a test key's starts with mps_test_).
+	 * @param callable|null $log      Receives ( message, level ) to log, or null for none.
 	 */
-	public function __construct( $base_url, $client_id, $client_secret, $log = null ) {
-		$this->base_url      = untrailingslashit( $base_url );
-		$this->client_id     = $client_id;
-		$this->client_secret = $client_secret;
-		$this->log           = $log;
+	public function __construct( $base_url, $api_key, $log = null ) {
+		$this->base_url = untrailingslashit( $base_url );
+		$this->api_key  = $api_key;
+		$this->log      = $log;
 	}
 
 	/**
 	 * Opens a payment on the hosted checkout.
 	 *
-	 * @param array $body amount (cents), reference, successUrl, failureUrl and optionally callbackUrl.
+	 * @param array  $body            amount (cents), reference, successUrl, failureUrl and optionally callbackUrl.
+	 * @param string $idempotency_key The same key, with the same body, for a resend of the same attempt, so it never opens a second payment.
 	 * @return array paymentReference and checkoutUrl.
-	 * @throws Exception When the gateway refuses or cannot be reached.
+	 * @throws Exception When the gateway refuses or cannot be reached; a refusal is an Mps_Payments_Api_Exception.
 	 */
-	public function create_payment( array $body ) {
-		return $this->call( 'POST', '/api/payments/internet/create', $body );
+	public function create_payment( array $body, $idempotency_key ) {
+		return $this->call( 'POST', '/api/payments/internet/create', $body, array( 'Idempotency-Key' => $idempotency_key ) );
 	}
 
 	/**
@@ -83,33 +83,73 @@ class Mps_Payments_Api {
 	}
 
 	/**
-	 * Fetches a fresh token, bypassing the cache — proves the credentials when they are saved.
+	 * Refunds part or all of a paid payment: POST /api/payments/{paymentReference}/refunds. A live key may do
+	 * this only when MPS granted it payments:refund; a test key always may. The payment is named by the path
+	 * only; the merchant's own reason stays in WooCommerce, MPS is told requested_by_customer.
 	 *
-	 * @throws Exception When the credentials are refused.
+	 * @param string   $payment_reference The payment's reference, as returned by create.
+	 * @param int|null $amount            Cents to refund, or null for everything still refundable.
+	 * @param string   $idempotency_key   The same key for a resend of the same refund, so it is never refunded twice.
+	 * @return array refundId, paymentReference, status, amount, currency, failureReason, cancelableUntil.
+	 * @throws Exception When the gateway refuses or cannot be reached; a refusal is an Mps_Payments_Api_Exception.
+	 */
+	public function refund_payment( $payment_reference, $amount, $idempotency_key ) {
+		$body = null === $amount ? array() : array( 'amount' => $amount );
+
+		$body['reason'] = 'requested_by_customer';
+
+		return $this->call( 'POST', '/api/payments/' . rawurlencode( $payment_reference ) . '/refunds', $body, array( 'Idempotency-Key' => $idempotency_key ) );
+	}
+
+	/**
+	 * Proves the API key when it is saved: a payment that does not exist is read with it, and 404 means MPS
+	 * accepted the key.
+	 *
+	 * @throws Exception When the key is refused.
 	 */
 	public function verify_credentials() {
-		$this->forget_token();
-		$this->token();
+		try {
+			$this->get_payment( self::CREDENTIAL_CHECK_REFERENCE );
+		} catch ( Exception $e ) {
+			if ( 404 === $e->getCode() ) {
+				return;
+			}
+			if ( in_array( $e->getCode(), array( 401, 403 ), true ) ) {
+				throw new Exception( sprintf( 'MPS refused the API key (%d)', $e->getCode() ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- escaped where shown (WC_Admin_Settings, WC_Logger).
+			}
+			throw $e;
+		}
+	}
+
+	/**
+	 * Whether an API key is a test key: it starts with mps_test_.
+	 *
+	 * @param string $api_key The API key.
+	 * @return bool
+	 */
+	public static function is_test_key( $api_key ) {
+		return 0 === strpos( $api_key, self::TEST_API_KEY_PREFIX );
 	}
 
 	/**
 	 * One authenticated call to the gateway.
 	 *
-	 * @param string     $method HTTP method.
-	 * @param string     $path   Path under the gateway.
-	 * @param array|null $body   JSON body, if any.
-	 * @param bool       $retry  Whether a 401 may fetch a new token and try once more.
+	 * @param string     $method  HTTP method.
+	 * @param string     $path    Path under the gateway.
+	 * @param array|null $body    JSON body, if any.
+	 * @param array      $headers Further headers, e.g. Idempotency-Key.
 	 * @return array The response's data.
-	 * @throws Exception On anything other than 2xx.
+	 * @throws Exception When the gateway cannot be reached.
+	 * @throws Mps_Payments_Api_Exception On anything other than 2xx.
 	 */
-	private function call( $method, $path, $body = null, $retry = true ) {
+	private function call( $method, $path, $body = null, array $headers = array() ) {
 		$args = array(
 			'method'  => $method,
 			'timeout' => 20,
 			'headers' => array(
-				'Authorization' => 'Bearer ' . $this->token(),
+				'Authorization' => 'Bearer ' . $this->api_key,
 				'Accept'        => 'application/json',
-			),
+			) + $headers,
 		);
 
 		if ( null !== $body ) {
@@ -126,105 +166,74 @@ class Mps_Payments_Api {
 			throw new Exception( 'MPS gateway unreachable: ' . $response->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- escaped where shown (WC_Admin_Settings, WC_Logger).
 		}
 
-		$status = (int) wp_remote_retrieve_response_code( $response );
-
-		// A token can expire between being cached and being used; one new token, one retry.
-		if ( 401 === $status && $retry ) {
-			$this->forget_token();
-			return $this->call( $method, $path, $body, false );
-		}
-
+		$status  = (int) wp_remote_retrieve_response_code( $response );
 		$decoded = json_decode( wp_remote_retrieve_body( $response ), true );
 
 		if ( $status < 200 || $status >= 300 ) {
 			$this->log( sprintf( '%s %s answered %d in %d ms: %s', $method, $path, $status, $elapsed, wp_remote_retrieve_body( $response ) ), 'warning' );
-			throw new Exception( sprintf( 'MPS gateway answered %d on %s %s', $status, $method, $path ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- escaped where shown (WC_Admin_Settings, WC_Logger).
+			throw new Mps_Payments_Api_Exception( sprintf( 'MPS gateway answered %d on %s %s', $status, $method, $path ), $status, self::errors( $decoded ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- escaped where shown (WC_Admin_Settings, WC_Logger, the order screen).
 		}
 
 		$data = isset( $decoded['data'] ) && is_array( $decoded['data'] ) ? $decoded['data'] : array();
 
-		$this->log( sprintf( '%s %s answered %d in %d ms%s', $method, $path, $status, $elapsed, self::describe( $body, $data ) ), 'info' );
+		$this->log( sprintf( '%s %s answered %d in %d ms%s', $method, $path, $status, $elapsed, self::describe( $body, $headers, $data ) ), 'info' );
 
 		return $data;
 	}
 
 	/**
-	 * A token for these credentials, from the cache while it lasts. The token endpoint is rate limited
-	 * far more tightly than the payment endpoints; one token serves every payment for 15 minutes.
+	 * What a refusal said was wrong: every message of a validation answer's errors, else its detail or title.
 	 *
-	 * @return string
-	 * @throws Exception When the credentials are refused.
+	 * @param mixed $decoded The decoded response body.
+	 * @return string[]
 	 */
-	private function token() {
-		$cached = get_transient( $this->token_key() );
-		if ( is_string( $cached ) && '' !== $cached ) {
-			return $cached;
+	private static function errors( $decoded ) {
+		if ( ! is_array( $decoded ) ) {
+			return array();
 		}
 
-		$response = wp_remote_post(
-			$this->base_url . '/connect/token',
-			array(
-				'timeout' => 20,
-				'body'    => array(
-					'grant_type'    => 'client_credentials',
-					'client_id'     => $this->client_id,
-					'client_secret' => $this->client_secret,
-					'scope'         => self::SCOPES,
-				),
-			)
-		);
-
-		if ( is_wp_error( $response ) ) {
-			$this->log( 'Token request failed: ' . $response->get_error_message(), 'error' );
-			throw new Exception( 'MPS gateway unreachable: ' . $response->get_error_message() ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- escaped where shown (WC_Admin_Settings, WC_Logger).
+		$messages = array();
+		if ( isset( $decoded['errors'] ) && is_array( $decoded['errors'] ) ) {
+			foreach ( $decoded['errors'] as $field_messages ) {
+				foreach ( (array) $field_messages as $message ) {
+					if ( is_string( $message ) && '' !== $message ) {
+						$messages[] = $message;
+					}
+				}
+			}
 		}
 
-		$status  = (int) wp_remote_retrieve_response_code( $response );
-		$decoded = json_decode( wp_remote_retrieve_body( $response ), true );
-
-		if ( 200 !== $status || empty( $decoded['access_token'] ) ) {
-			$this->log( sprintf( 'Token request for %s answered %d: %s', $this->client_id, $status, wp_remote_retrieve_body( $response ) ), 'warning' );
-			throw new Exception( sprintf( 'MPS refused the credentials (%d)', $status ) ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- escaped where shown (WC_Admin_Settings, WC_Logger).
+		if ( empty( $messages ) ) {
+			foreach ( array( 'detail', 'title' ) as $field ) {
+				if ( isset( $decoded[ $field ] ) && is_string( $decoded[ $field ] ) && '' !== $decoded[ $field ] ) {
+					return array( $decoded[ $field ] );
+				}
+			}
 		}
 
-		$lifetime = isset( $decoded['expires_in'] ) ? (int) $decoded['expires_in'] : 900;
-		$this->log( sprintf( 'New token for %s, valid %d s', $this->client_id, $lifetime ), 'info' );
-
-		// Expire a minute early so a token is never handed out in its last seconds.
-		set_transient( $this->token_key(), $decoded['access_token'], max( 60, $lifetime - 60 ) );
-
-		return $decoded['access_token'];
+		return $messages;
 	}
 
 	/**
-	 * Drops the cached token, so the next call fetches a new one.
-	 */
-	private function forget_token() {
-		delete_transient( $this->token_key() );
-	}
-
-	/**
-	 * Keyed by gateway, client and secret, so changing any of them never reuses a token for the old ones.
-	 */
-	private function token_key() {
-		return 'mps_payments_token_' . md5( $this->base_url . '|' . $this->client_id . '|' . $this->client_secret );
-	}
-
-	/**
-	 * What a successful call was about, for the log. Deliberately a whitelist: the token, the secrets,
-	 * checkoutUrl (which pays the payment) and the return URLs (which carry the order key) never appear.
+	 * What a successful call was about, for the log. Deliberately a whitelist: the API key, the secrets, checkoutUrl (which pays the payment) and the return URLs (which carry the order key) never
+	 * appear.
 	 *
 	 * @param array|null $request  The request body.
+	 * @param array      $headers  The further request headers.
 	 * @param array      $response The response's data.
 	 */
-	private static function describe( $request, array $response ) {
+	private static function describe( $request, array $headers, array $response ) {
 		$parts = array();
 
-		if ( is_array( $request ) ) {
+		if ( is_array( $request ) && isset( $request['reference'] ) ) {
 			$parts[] = sprintf( 'amount %d, reference %s, webhook %s', $request['amount'], $request['reference'], isset( $request['callbackUrl'] ) ? 'yes' : 'no' );
 		}
 
-		foreach ( array( 'paymentReference', 'state', 'amount', 'currency' ) as $field ) {
+		if ( isset( $headers['Idempotency-Key'] ) ) {
+			$parts[] = 'idempotency key ' . $headers['Idempotency-Key'];
+		}
+
+		foreach ( array( 'paymentReference', 'refundId', 'state', 'status', 'amount', 'currency', 'failureReason', 'cancelableUntil' ) as $field ) {
 			if ( isset( $response[ $field ] ) && is_scalar( $response[ $field ] ) ) {
 				$parts[] = $field . ' ' . $response[ $field ];
 			}

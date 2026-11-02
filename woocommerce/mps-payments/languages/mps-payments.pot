@@ -2,14 +2,14 @@
 # This file is distributed under the GPL-2.0-or-later.
 msgid ""
 msgstr ""
-"Project-Id-Version: MPS Payments for WooCommerce 0.1.0\n"
+"Project-Id-Version: MPS Payments for WooCommerce 1.0.0\n"
 "Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/plugin\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-10-22T14:28:57+00:00\n"
+"POT-Creation-Date: 2026-10-31T17:03:17+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.12.0\n"
 "X-Domain: mps-payments\n"
@@ -35,156 +35,229 @@ msgstr ""
 msgid "Mobile Payment Solutions"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:42
+#: includes/class-mps-payments-gateway.php:71
 msgid "MPS Payments"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:43
+#: includes/class-mps-payments-gateway.php:72
 msgid "Payments on the checkout page MPS hosts. Card details never reach your shop."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:65
+#: includes/class-mps-payments-gateway.php:97
 msgid "Enable"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:67
+#: includes/class-mps-payments-gateway.php:99
 msgid "Offer MPS Payments at checkout"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:71
+#: includes/class-mps-payments-gateway.php:103
 msgid "Title"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:73
+#: includes/class-mps-payments-gateway.php:105
 msgid "The name of this payment method at checkout."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:74
+#: includes/class-mps-payments-gateway.php:106
 msgid "MPS"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:78
+#: includes/class-mps-payments-gateway.php:110
 msgid "Description"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:80
+#: includes/class-mps-payments-gateway.php:112
 msgid "Shown under the title at checkout."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:81
+#: includes/class-mps-payments-gateway.php:113
 msgid "Pay by card or with your banking app on the secure MPS payment page."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:85
+#: includes/class-mps-payments-gateway.php:117
 msgid "Connection"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:87
-msgid "Paste the client ID, secret and webhook signing secret from the MPS platform (Online › Get started). A test key, whose client ID starts with test_, works for 24 hours and accepts only the MPS test cards: no card is charged and nothing is paid out."
+#: includes/class-mps-payments-gateway.php:119
+msgid "Paste the API key and the webhook signing secret from the MPS platform (Online › Get started). A test key, which starts with mps_test_, accepts only the MPS test cards: no card is charged and nothing is paid out."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:88
+#: includes/class-mps-payments-gateway.php:120
 msgid "This payment method sends the order amount, order number and your shop's return addresses to MPS (Mobile Payment Solutions) to open each payment."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:91
-msgid "Client ID"
+#: includes/class-mps-payments-gateway.php:123
+msgid "API key"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:95
-msgid "Client secret"
-msgstr ""
-
-#: includes/class-mps-payments-gateway.php:99
+#: includes/class-mps-payments-gateway.php:127
 msgid "Webhook signing secret"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:101
+#: includes/class-mps-payments-gateway.php:129
 msgid "Shown with your key in the MPS platform. Payment notifications are only acted on when their signature matches; without a secret they are ignored and orders are settled by the plugin's own checks."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:105
+#: includes/class-mps-payments-gateway.php:133
 msgid "Advanced"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:109
-#: includes/class-mps-payments-gateway.php:120
+#: includes/class-mps-payments-gateway.php:137
+#: includes/class-mps-payments-gateway.php:148
 msgid "Gateway URL"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:112
+#: includes/class-mps-payments-gateway.php:140
 msgid "Leave as is unless MPS asks you to change it."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:123
+#: includes/class-mps-payments-gateway.php:151
 msgid "Set by MPS_PAYMENTS_GATEWAY_URL in wp-config.php."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:130
+#: includes/class-mps-payments-gateway.php:158
 msgid "Debug log"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:132
+#: includes/class-mps-payments-gateway.php:160
 msgid "Log every call to MPS in WooCommerce › Status › Logs (never secrets or payment links)"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:168
-msgid "Connected to MPS with a test key. It works for 24 hours and accepts only the MPS test cards; no card is charged."
+#: includes/class-mps-payments-gateway.php:206
+msgid "MPS Payments is enabled but not offered at checkout: it has no API key. A client ID and secret no longer connect to MPS. Paste the API key and the webhook signing secret from the MPS platform (Online › Get started) under WooCommerce › Settings › Payments › MPS Payments."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:169
+#: includes/class-mps-payments-gateway.php:242
+msgid "Connected to MPS with a test key. It accepts only the MPS test cards; no card is charged."
+msgstr ""
+
+#: includes/class-mps-payments-gateway.php:243
 msgid "Connected to MPS."
 msgstr ""
 
 #. translators: %s: the reason the connection failed
-#: includes/class-mps-payments-gateway.php:174
+#: includes/class-mps-payments-gateway.php:248
 #, php-format
 msgid "MPS did not accept these credentials: %s"
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:199
+#: includes/class-mps-payments-gateway.php:291
 msgid "MPS could not open a payment. Enable the debug log for details."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:200
-#: includes/class-mps-payments-gateway.php:205
+#: includes/class-mps-payments-gateway.php:292
+#: includes/class-mps-payments-gateway.php:297
 msgid "The payment could not be started. Please try again or choose another payment method."
 msgstr ""
 
 #. translators: %s: the MPS payment reference
-#: includes/class-mps-payments-gateway.php:215
+#: includes/class-mps-payments-gateway.php:308
 #, php-format
 msgid "MPS payment %s opened; shopper sent to the MPS checkout."
 msgstr ""
 
-#: includes/class-mps-payments-gateway.php:254
+#: includes/class-mps-payments-gateway.php:363
+msgid "This order has no MPS payment to refund."
+msgstr ""
+
+#. translators: 1: the MPS refund id, 2: why it failed, e.g. declined
+#: includes/class-mps-payments-gateway.php:383
+#, php-format
+msgid "MPS refused refund %1$s (%2$s). Nothing was refunded."
+msgstr ""
+
+#. translators: 1: the MPS refund id, 2: the amount
+#: includes/class-mps-payments-gateway.php:391
+#, php-format
+msgid "MPS refund %1$s: %2$s refunded."
+msgstr ""
+
+#. translators: 1: the MPS refund id, 2: the amount, 3: date and time it is sent
+#: includes/class-mps-payments-gateway.php:396
+#, php-format
+msgid "MPS refund %1$s of %2$s is being processed. It is sent after %3$s and can be canceled in MPS until then."
+msgstr ""
+
+#. translators: 1: the MPS refund id, 2: the amount
+#: includes/class-mps-payments-gateway.php:405
+#, php-format
+msgid "MPS refund %1$s of %2$s is being processed."
+msgstr ""
+
+#. translators: %s: what MPS said was wrong, e.g. the amount is more than is left
+#: includes/class-mps-payments-gateway.php:462
+#, php-format
+msgid "MPS refused the refund: %s"
+msgstr ""
+
+#: includes/class-mps-payments-gateway.php:464
+msgid "MPS refused the API key. Check it under WooCommerce › Settings › Payments › MPS Payments."
+msgstr ""
+
+#: includes/class-mps-payments-gateway.php:466
+msgid "This MPS key may not make refunds: it does not hold the payments:refund scope. A live key holds it only when MPS granted it to that key, so ask MPS to grant it. A test key always holds it."
+msgstr ""
+
+#: includes/class-mps-payments-gateway.php:468
+msgid "MPS does not know this order's payment for the configured key. A test key refunds only test payments, and a live key only live ones."
+msgstr ""
+
+#: includes/class-mps-payments-gateway.php:470
+msgid "MPS cannot refund this payment right now: it is not paid yet, or the same refund is still being processed. Please try again in a moment."
+msgstr ""
+
+#: includes/class-mps-payments-gateway.php:473
+msgid "MPS did not answer. The refund may have been made: check the payment in MPS before trying again. Trying again with the same amount does not refund twice."
+msgstr ""
+
+#: includes/class-mps-payments-gateway.php:502
 msgid "Your payment was not completed. Please try again or choose another payment method."
 msgstr ""
 
+#. translators: 1: the MPS refund id, 2: the amount
+#: includes/class-mps-payments-gateway.php:605
+#, php-format
+msgid "MPS refund %1$s of %2$s was paid out."
+msgstr ""
+
+#. translators: 1: the MPS refund id, 2: the amount, 3: the WooCommerce refund number
+#: includes/class-mps-payments-gateway.php:628
+#, php-format
+msgid "MPS refund %1$s of %2$s was not paid out (failed); the WooCommerce refund #%3$d is removed and the amount can be refunded again."
+msgstr ""
+
+#. translators: 1: the MPS refund id, 2: the amount, 3: the WooCommerce refund number
+#: includes/class-mps-payments-gateway.php:630
+#, php-format
+msgid "MPS refund %1$s of %2$s was canceled; the WooCommerce refund #%3$d is removed and the amount can be refunded again."
+msgstr ""
+
 #. translators: 1: approved amount, 2: order total, 3: MPS payment reference
-#: includes/class-mps-payments-gateway.php:364
+#: includes/class-mps-payments-gateway.php:720
 #, php-format
 msgid "MPS approved %1$s of %2$s (payment %3$s). Check before shipping."
 msgstr ""
 
 #. translators: %s: the MPS payment reference
-#: includes/class-mps-payments-gateway.php:373
+#: includes/class-mps-payments-gateway.php:729
 #, php-format
 msgid "MPS payment %s paid."
 msgstr ""
 
 #. translators: %s: the MPS payment reference
-#: includes/class-mps-payments-gateway.php:380
+#: includes/class-mps-payments-gateway.php:736
 #, php-format
 msgid "MPS payment %s failed."
 msgstr ""
 
 #. translators: %s: the MPS payment reference
-#: includes/class-mps-payments-gateway.php:383
+#: includes/class-mps-payments-gateway.php:739
 #, php-format
 msgid "The shopper left MPS payment %s without paying."
 msgstr ""
 
-#: mps-payments.php:95
+#: mps-payments.php:83
+#: mps-payments.php:115
 msgid "Settings"
 msgstr ""

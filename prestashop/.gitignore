@@ -1,2 +1,5 @@
 dist/
 __pycache__/
+# Written into the module folder by PrestaShop when the dev shop mounts it from source.
+mpspayments/config.xml
+mpspayments/config_*.xml

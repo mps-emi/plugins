@@ -53,17 +53,14 @@ msgstr "Payez par carte ou avec votre application bancaire sur la page de paieme
 msgid "Connection"
 msgstr "Connexion"
 
-msgid "Paste the client ID, secret and webhook signing secret from the MPS platform (Online › Get started). A test key, whose client ID starts with test_, works for 24 hours and accepts only the MPS test cards: no card is charged and nothing is paid out."
-msgstr "Collez l'ID client, le secret et le secret de signature des webhooks depuis la plateforme MPS (En ligne › Commencer). Une clé de test, dont l'ID client commence par test_, fonctionne 24 heures et n'accepte que les cartes de test MPS : aucune carte n'est débitée et rien n'est versé."
+msgid "Paste the API key and the webhook signing secret from the MPS platform (Online › Get started). A test key, which starts with mps_test_, accepts only the MPS test cards: no card is charged and nothing is paid out."
+msgstr "Collez la clé API et le secret de signature des webhooks depuis la plateforme MPS (En ligne › Commencer). Une clé de test, qui commence par mps_test_, n'accepte que les cartes de test MPS : aucune carte n'est débitée et rien n'est versé."
 
 msgid "This payment method sends the order amount, order number and your shop's return addresses to MPS (Mobile Payment Solutions) to open each payment."
 msgstr "Ce moyen de paiement envoie à MPS (Mobile Payment Solutions) le montant et le numéro de la commande ainsi que les adresses de retour de votre boutique pour ouvrir chaque paiement."
 
-msgid "Client ID"
-msgstr "ID client"
-
-msgid "Client secret"
-msgstr "Secret client"
+msgid "API key"
+msgstr "Clé API"
 
 msgid "Webhook signing secret"
 msgstr "Secret de signature des webhooks"
@@ -89,8 +86,11 @@ msgstr "Journal de débogage"
 msgid "Log every call to MPS in WooCommerce › Status › Logs (never secrets or payment links)"
 msgstr "Consigner chaque appel à MPS dans WooCommerce › État › Journaux (jamais de secrets ni de liens de paiement)"
 
-msgid "Connected to MPS with a test key. It works for 24 hours and accepts only the MPS test cards; no card is charged."
-msgstr "Connecté à MPS avec une clé de test. Elle fonctionne 24 heures et n'accepte que les cartes de test MPS ; aucune carte n'est débitée."
+msgid "MPS Payments is enabled but not offered at checkout: it has no API key. A client ID and secret no longer connect to MPS. Paste the API key and the webhook signing secret from the MPS platform (Online › Get started) under WooCommerce › Settings › Payments › MPS Payments."
+msgstr "MPS Payments est activé mais n'est pas proposé lors du paiement : aucune clé API n'est configurée. Un identifiant client et un secret client ne permettent plus de se connecter à MPS. Collez la clé API et le secret de signature des webhooks depuis la plateforme MPS (En ligne › Commencer) sous WooCommerce › Réglages › Paiements › MPS Payments."
+
+msgid "Connected to MPS with a test key. It accepts only the MPS test cards; no card is charged."
+msgstr "Connecté à MPS avec une clé de test. Elle n'accepte que les cartes de test MPS ; aucune carte n'est débitée."
 
 msgid "Connected to MPS."
 msgstr "Connecté à MPS."
@@ -130,3 +130,53 @@ msgstr "Le client a quitté le paiement MPS %s sans payer."
 
 msgid "Settings"
 msgstr "Réglages"
+
+msgid "This order has no MPS payment to refund."
+msgstr "Cette commande n'a aucun paiement MPS à rembourser."
+
+#, php-format
+msgid "MPS refused refund %1$s (%2$s). Nothing was refunded."
+msgstr "MPS a refusé le remboursement %1$s (%2$s). Rien n'a été remboursé."
+
+#, php-format
+msgid "MPS refund %1$s: %2$s refunded."
+msgstr "Remboursement MPS %1$s : %2$s remboursé."
+
+#, php-format
+msgid "MPS refund %1$s of %2$s is being processed. It is sent after %3$s and can be canceled in MPS until then."
+msgstr "Le remboursement MPS %1$s de %2$s est en cours de traitement. Il est envoyé après le %3$s et peut être annulé dans MPS d'ici là."
+
+#, php-format
+msgid "MPS refund %1$s of %2$s is being processed."
+msgstr "Le remboursement MPS %1$s de %2$s est en cours de traitement."
+
+#, php-format
+msgid "MPS refused the refund: %s"
+msgstr "MPS a refusé le remboursement : %s"
+
+msgid "MPS refused the API key. Check it under WooCommerce › Settings › Payments › MPS Payments."
+msgstr "MPS a refusé la clé API. Vérifiez-la sous WooCommerce › Réglages › Paiements › MPS Payments."
+
+msgid "This MPS key may not make refunds: it does not hold the payments:refund scope. A live key holds it only when MPS granted it to that key, so ask MPS to grant it. A test key always holds it."
+msgstr "Cette clé MPS ne peut pas effectuer de remboursements : elle ne dispose pas du scope payments:refund. Une clé live n'en dispose que si MPS l'a accordé à cette clé ; demandez-le à MPS. Une clé de test en dispose toujours."
+
+msgid "MPS does not know this order's payment for the configured key. A test key refunds only test payments, and a live key only live ones."
+msgstr "MPS ne connaît pas le paiement de cette commande pour la clé configurée. Une clé de test ne rembourse que des paiements de test, et une clé live que des paiements live."
+
+msgid "MPS cannot refund this payment right now: it is not paid yet, or the same refund is still being processed. Please try again in a moment."
+msgstr "MPS ne peut pas rembourser ce paiement pour l'instant : il n'est pas encore payé, ou le même remboursement est encore en cours de traitement. Réessayez dans un instant."
+
+msgid "MPS did not answer. The refund may have been made: check the payment in MPS before trying again. Trying again with the same amount does not refund twice."
+msgstr "MPS n'a pas répondu. Le remboursement a peut-être été effectué : vérifiez le paiement dans MPS avant de réessayer. Réessayer avec le même montant ne rembourse pas deux fois."
+
+#, php-format
+msgid "MPS refund %1$s of %2$s was paid out."
+msgstr "Le remboursement MPS %1$s de %2$s a été versé."
+
+#, php-format
+msgid "MPS refund %1$s of %2$s was not paid out (failed); the WooCommerce refund #%3$d is removed and the amount can be refunded again."
+msgstr "Le remboursement MPS %1$s de %2$s n'a pas été versé (échec) ; le remboursement WooCommerce n°%3$d est supprimé et le montant peut à nouveau être remboursé."
+
+#, php-format
+msgid "MPS refund %1$s of %2$s was canceled; the WooCommerce refund #%3$d is removed and the amount can be refunded again."
+msgstr "Le remboursement MPS %1$s de %2$s a été annulé ; le remboursement WooCommerce n°%3$d est supprimé et le montant peut à nouveau être remboursé."

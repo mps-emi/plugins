@@ -16,6 +16,10 @@
 /**
  * The payment option posts here: open the MPS payment for the cart and send the shopper to the hosted
  * checkout. No order exists yet; it is made once MPS says the cart was paid.
+ *
+ * Each checkout attempt has its own Idempotency-Key, stored before the payment is asked for. A resend of
+ * the attempt (MpsPaymentsRepository::isResendable) sends the same key and body, so MPS hands back the
+ * payment it already opened; a new attempt gets a new key.
  */
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -36,14 +40,14 @@ class MpsPaymentsRedirectModuleFrontController extends ModuleFrontController
             Tools::redirect($this->context->link->getPageLink('order'));
         }
 
-        $returnToken = bin2hex(random_bytes(16));
         $amount = MpsPaymentsOutcome::cents($cart->getOrderTotal(true, Cart::BOTH));
+        $attempt = $this->attempt($cart, $amount);
 
         $body = [
             'amount' => $amount,
             'reference' => 'cart-' . (int) $cart->id,
-            'successUrl' => $this->context->link->getModuleLink($this->module->name, 'return', ['t' => $returnToken, 'result' => 'success'], true),
-            'failureUrl' => $this->context->link->getModuleLink($this->module->name, 'return', ['t' => $returnToken, 'result' => 'failure'], true),
+            'successUrl' => $this->context->link->getModuleLink($this->module->name, 'return', ['t' => $attempt['return_token'], 'result' => 'success'], true),
+            'failureUrl' => $this->context->link->getModuleLink($this->module->name, 'return', ['t' => $attempt['return_token'], 'result' => 'failure'], true),
         ];
 
         $callbackUrl = $this->context->link->getModuleLink($this->module->name, 'webhook', [], true);
@@ -52,8 +56,13 @@ class MpsPaymentsRedirectModuleFrontController extends ModuleFrontController
         }
 
         try {
-            $payment = $this->module->api((int) $cart->id_shop)->createPayment($body);
+            $payment = $this->module->api((int) $cart->id_shop)->createPayment($body, $attempt['idempotency_key']);
         } catch (Exception $e) {
+            // A refusal is final for this key: the next try is a new attempt. No answer, a 5xx or a 409 may
+            // have opened the payment, so the next try resends this one.
+            if ($e->getCode() >= 400 && $e->getCode() < 500 && 409 !== $e->getCode()) {
+                MpsPaymentsRepository::update($attempt['id_mps_payment'], ['outcome' => pSQL(MpsPaymentsOutcome::FAILED)]);
+            }
             $payment = [];
         }
 
@@ -62,9 +71,38 @@ class MpsPaymentsRedirectModuleFrontController extends ModuleFrontController
             $this->redirectWithNotifications($this->context->link->getPageLink('order'));
         }
 
-        MpsPaymentsRepository::add($cart->id, $cart->id_shop, $payment['paymentReference'], $returnToken, $amount);
+        MpsPaymentsRepository::update($attempt['id_mps_payment'], ['payment_reference' => pSQL($payment['paymentReference'])]);
 
         // checkoutUrl pays this payment for whoever holds it: hand it to the browser and nowhere else.
         Tools::redirect($payment['checkoutUrl']);
+    }
+
+    /**
+     * The cart's last attempt when this checkout resends it, else a new one. One whose payment is open is
+     * read first: a payment MPS already failed or abandoned is settled, and a new attempt made.
+     *
+     * @return array id_mps_payment, return_token, idempotency_key
+     */
+    private function attempt(Cart $cart, $amount)
+    {
+        // A double submit arrives twice at once; both must find the same attempt.
+        $lock = 'mps_payments_attempt_' . (int) $cart->id;
+        $locked = 1 === (int) Db::getInstance()->getValue("SELECT GET_LOCK('" . pSQL($lock) . "', 30)", false);
+
+        try {
+            $last = MpsPaymentsRepository::lastForCart($cart->id);
+            if (MpsPaymentsRepository::isResendable($last, $amount, time())
+                && (null === $last['payment_reference']
+                    || MpsPaymentsOutcome::PENDING === (new MpsPaymentsSettlement($this->module))->settle($last['payment_reference']))
+            ) {
+                return $last;
+            }
+
+            return MpsPaymentsRepository::start($cart->id, $cart->id_shop, $amount);
+        } finally {
+            if ($locked) {
+                Db::getInstance()->getValue("SELECT RELEASE_LOCK('" . pSQL($lock) . "')", false);
+            }
+        }
     }
 }

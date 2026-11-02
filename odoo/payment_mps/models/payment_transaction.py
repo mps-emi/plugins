@@ -1,14 +1,15 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from urllib.parse import quote, urlencode
 
 from odoo import api, fields, models
-from odoo.exceptions import ValidationError
+from odoo.exceptions import UserError, ValidationError
 from odoo.tools import urls
 
 from odoo.addons.payment import utils as payment_utils
 from odoo.addons.payment.logging import get_payment_logger
 from odoo.addons.payment_mps import const, utils
 from odoo.addons.payment_mps.controllers.main import MpsController
+from odoo.addons.payment_mps.models.payment_provider import MpsRequestRefused
 
 _logger = get_payment_logger(__name__, sensitive_keys=const.SENSITIVE_KEYS)
 
@@ -30,9 +31,14 @@ class PaymentTransaction(models.Model):
         if self.provider_code != "mps":
             return super()._get_specific_rendering_values(processing_values)
 
+        # Odoo opens a new transaction, with a new reference, for every attempt: the reference is the
+        # Idempotency-Key, so a request sent again for this attempt answers the payment it opened.
         try:
             opened = self._send_api_request(
-                "POST", "/api/payments/internet/create", json=self._mps_prepare_payment_payload()
+                "POST",
+                "/api/payments/internet/create",
+                json=self._mps_prepare_payment_payload(),
+                idempotency_key=self.reference,
             )
         except ValidationError as error:
             _logger.warning("MPS could not open a payment for %s: %s", self.reference, error)
@@ -85,12 +91,107 @@ class PaymentTransaction(models.Model):
             "GET", f"/api/payments/internet/{quote(self.provider_reference, safe='')}"
         )
 
+    def _mps_read_refund(self):
+        """Read the refund back, under the payment it refunds: by that payment's reference (the source
+        transaction's provider reference) and the refund id MPS gave it (this one's).
+
+        :return: refundId, status, amount (cents), currency, failureReason and cancelableUntil.
+        :rtype: dict
+        :raise ValidationError: When either reference is missing, or MPS cannot be reached or refuses.
+        """
+        self.ensure_one()
+        payment_reference = self.source_transaction_id.provider_reference
+        if not payment_reference or not self.provider_reference:
+            raise ValidationError(
+                self.env._("The refund %s cannot be read: its MPS payment is not known.", self.reference)
+            )
+        return self._send_api_request(
+            "GET",
+            f"{self._mps_refunds_endpoint(payment_reference)}/{quote(self.provider_reference, safe='')}",
+        )
+
+    @staticmethod
+    def _mps_refunds_endpoint(payment_reference):
+        """The refunds of one payment; its reference is a single path segment.
+
+        :param str payment_reference: The MPS payment reference.
+        :rtype: str
+        """
+        return f"/api/payments/{quote(payment_reference, safe='')}/refunds"
+
+    def _mps_read(self):
+        """Read what this transaction is at MPS: the refund for a refund, the payment otherwise."""
+        self.ensure_one()
+        return self._mps_read_refund() if self.operation == "refund" else self._mps_read_payment()
+
+    def _send_refund_request(self):
+        """Override of `payment` to refund the source transaction's payment at MPS, under that
+        payment: `POST /api/payments/{paymentReference}/refunds`.
+
+        The refund transaction's reference is the Idempotency-Key, so a request sent again (a retry
+        after a timeout) answers the first refund instead of refunding twice.
+
+        :raise UserError: When MPS refuses the refund; the message says why and what to do.
+        """
+        if self.provider_code != "mps":
+            return super()._send_refund_request()
+
+        payload = {
+            # A refund transaction's amount is negative.
+            "amount": payment_utils.to_minor_currency_units(-self.amount, self.currency_id),
+            "reason": const.REFUND_REASON,
+        }
+        try:
+            refund = self._send_api_request(
+                "POST",
+                self._mps_refunds_endpoint(self.source_transaction_id.provider_reference),
+                json=payload,
+                idempotency_key=self.reference,
+            )
+        except MpsRequestRefused as error:
+            raise UserError(self._mps_refund_refusal(error)) from None
+        self._record(refund)
+
+    def _mps_refund_refusal(self, error):
+        """What to tell the merchant when MPS refuses a refund (4xx).
+
+        :param MpsRequestRefused error: The refusal.
+        :rtype: str
+        """
+        if error.status == 400:
+            details = "\n".join(
+                str(message)
+                for messages in error.errors.values()
+                for message in (messages if isinstance(messages, list) else [messages])
+            )
+            return self.env._("MPS refused this refund:\n%s", details or str(error))
+        if error.status == 403:
+            return self.env._(
+                "Your MPS API key may not make refunds: it lacks the payments:refund permission. A"
+                " production key holds it only when MPS granted it, so ask MPS to grant it to this key."
+                " A test key always holds it."
+            )
+        if error.status == 404:
+            return self.env._(
+                "MPS does not know this payment for this API key. A test key refunds only test"
+                " payments, and a live key only live ones."
+            )
+        if error.status == 409:
+            return self.env._(
+                "MPS cannot refund this payment right now: it has not been paid yet, or this refund is"
+                " still being processed. Try again in a moment."
+            )
+        return self.env._("MPS refused this refund (%s).", error.status)
+
     # === PROCESSING === #
 
     def _apply_updates(self, payment_data):
         """Override of `payment` to move the transaction on the payment's state."""
         if self.provider_code != "mps":
             super()._apply_updates(payment_data)
+            return
+        if self.operation == "refund":
+            self._mps_apply_refund_updates(payment_data)
             return
 
         state = payment_data.get("state")
@@ -121,6 +222,53 @@ class PaymentTransaction(models.Model):
             # Pending, or a state this addon does not know: an unknown state never means paid.
             self._set_pending()
 
+    def _mps_apply_refund_updates(self, refund):
+        """Move a refund transaction on the refund's status."""
+        if refund.get("refundId"):
+            # Every later read of the refund is made by it.
+            self.provider_reference = refund["refundId"]
+
+        status = refund.get("status")
+        if status == "refunded":
+            self._set_done()
+        elif status == "failed":
+            self._set_error(
+                self.env._(
+                    "MPS could not make the refund (%s). Nothing was refunded; you can refund again.",
+                    refund.get("failureReason") or "unknown",
+                )
+            )
+        elif status == "canceled":
+            self._set_canceled(
+                state_message=self.env._("The refund was canceled in MPS. Nothing was refunded.")
+            )
+        else:
+            # Pending, or a status this addon does not know: an unknown status never means refunded.
+            # MPS holds every refund until cancelableUntil before sending it; after that it is pending
+            # until decided.
+            cancelable_until = refund.get("cancelableUntil")
+            if cancelable_until:
+                message = self.env._(
+                    "MPS sends this refund after %(until)s (UTC). Until then it can still be canceled"
+                    " in MPS.",
+                    until=self._mps_format_utc(cancelable_until),
+                )
+            else:
+                message = self.env._(
+                    "MPS has not decided the refund yet. It is read again in a few minutes."
+                )
+            if self.state == "pending":
+                self.state_message = message
+            self._set_pending(state_message=message)
+
+    @staticmethod
+    def _mps_format_utc(value):
+        """An ISO 8601 UTC time from MPS as `YYYY-MM-DD HH:MM`; anything else as it came."""
+        try:
+            return datetime.fromisoformat(value.replace("Z", "+00:00")).strftime("%Y-%m-%d %H:%M")
+        except (AttributeError, ValueError):
+            return str(value)
+
     def _extract_amount_data(self, payment_data):
         """Override of `payment` to extract the amount and currency from the payment data."""
         if self.provider_code != "mps":
@@ -134,8 +282,9 @@ class PaymentTransaction(models.Model):
 
     @api.model
     def _cron_mps_check_payments(self):
-        """Read open MPS transactions again at each of `const.CHECK_DELAYS_MINUTES` after they were
-        opened. A run that comes late reads once for all the delays it passed."""
+        """Read open MPS transactions, payments and refunds, again at each of
+        `const.CHECK_DELAYS_MINUTES` after they were opened. A run that comes late reads once for all
+        the delays it passed."""
         now = fields.Datetime.now()
         txs = self.search([
             ("provider_code", "=", "mps"),
@@ -151,6 +300,6 @@ class PaymentTransaction(models.Model):
 
             tx.mps_check_count = due
             try:
-                tx._record(tx._mps_read_payment())
+                tx._record(tx._mps_read())
             except ValidationError as error:
                 _logger.warning("Scheduled read of %s failed: %s", tx.reference, error)

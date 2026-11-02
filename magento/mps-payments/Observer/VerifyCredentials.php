@@ -9,10 +9,11 @@ use Magento\Framework\Message\ManagerInterface;
 use Magento\Store\Model\StoreManagerInterface;
 use Mps\Payments\Model\Api;
 use Mps\Payments\Model\Config;
+use Mps\Payments\Model\System\MissingApiKey;
 
 /**
- * After the payment methods are saved, proves the MPS credentials with a real token request, so a wrong
- * key is found now rather than by the first shopper.
+ * After the payment methods are saved, proves the MPS API key with a real call to MPS, so a wrong key is found
+ * now rather than by the first shopper. Saved enabled without a key, the method is not offered: it says so.
  */
 class VerifyCredentials implements ObserverInterface
 {
@@ -29,6 +30,9 @@ class VerifyCredentials implements ObserverInterface
         $storeId = $this->storeId((string) $observer->getEvent()->getData('store'), (string) $observer->getEvent()->getData('website'));
 
         if (!$this->config->hasCredentials($storeId)) {
+            if ($this->config->isMissingApiKey($storeId)) {
+                $this->messages->addErrorMessage(MissingApiKey::text());
+            }
             return;
         }
 
@@ -36,7 +40,7 @@ class VerifyCredentials implements ObserverInterface
             $this->api->verifyCredentials($storeId);
             $this->messages->addSuccessMessage(
                 $this->config->isTestKey($storeId)
-                    ? __('Connected to MPS with a test key. It works for 24 hours and accepts only the MPS test cards; no card is charged.')
+                    ? __('Connected to MPS with a test key. It accepts only the MPS test cards; no card is charged.')
                     : __('Connected to MPS.')
             );
         } catch (\Exception $e) {

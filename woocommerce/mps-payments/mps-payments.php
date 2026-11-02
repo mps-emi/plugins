@@ -3,7 +3,7 @@
  * Plugin Name:          MPS Payments for WooCommerce
  * Plugin URI:           https://www.mps-emi.com
  * Description:          Take payments in your WooCommerce shop on the MPS-hosted checkout page.
- * Version:              0.1.0
+ * Version:              1.0.0
  * Requires at least:    6.4
  * Requires PHP:         7.4
  * Requires Plugins:     woocommerce
@@ -23,7 +23,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MPS_PAYMENTS_VERSION', '0.1.0' );
+define( 'MPS_PAYMENTS_VERSION', '1.0.0' );
 define( 'MPS_PAYMENTS_FILE', __FILE__ );
 define( 'MPS_PAYMENTS_DIR', plugin_dir_path( __FILE__ ) );
 define( 'MPS_PAYMENTS_URL', plugin_dir_url( __FILE__ ) );
@@ -65,7 +65,24 @@ add_action(
 		}
 
 		require_once MPS_PAYMENTS_DIR . 'includes/class-mps-payments-api.php';
+		require_once MPS_PAYMENTS_DIR . 'includes/class-mps-payments-api-exception.php';
 		require_once MPS_PAYMENTS_DIR . 'includes/class-mps-payments-gateway.php';
+
+		// An update replaces the files without activating anything, so the upgrade runs here; once done it only reads the settings.
+		Mps_Payments_Gateway::forget_client_credentials();
+
+		// A shop that connected with a client ID and secret has no API key now: say so on every admin screen until one is pasted.
+		add_action(
+			'admin_notices',
+			static function () {
+				$message = Mps_Payments_Gateway::missing_api_key_message( get_option( Mps_Payments_Gateway::SETTINGS_OPTION ) );
+				if ( '' === $message || ! current_user_can( 'manage_woocommerce' ) ) { // phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce's own capability, the one its settings require.
+					return;
+				}
+				$url = admin_url( 'admin.php?page=wc-settings&tab=checkout&section=' . Mps_Payments_Gateway::ID );
+				echo '<div class="notice notice-error"><p>' . esc_html( $message ) . ' <a href="' . esc_url( $url ) . '">' . esc_html__( 'Settings', 'mps-payments' ) . '</a></p></div>';
+			}
+		);
 
 		add_filter(
 			'woocommerce_payment_gateways',
@@ -74,6 +91,9 @@ add_action(
 				return $gateways;
 			}
 		);
+
+		// WooCommerce hands process_refund the amount only; this keeps the refund it is creating.
+		add_action( 'woocommerce_create_refund', array( Mps_Payments_Gateway::class, 'remember_refund' ) );
 
 		// Scheduled re-reads run outside a request that loaded the gateways, so fetch the configured instance.
 		add_action(

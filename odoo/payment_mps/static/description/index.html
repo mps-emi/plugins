@@ -69,8 +69,8 @@
         style="border: 1px solid #dbe3ec; border-radius: 10px;">
     </div>
     <div class="col-md-12" style="margin-bottom: 32px;">
-      <p class="text-center" style="font-size: 18px;">The provider takes a client ID and secret from the MPS
-        platform, and says when it is a test key.</p>
+      <p class="text-center" style="font-size: 18px;">The provider takes an API key from the MPS platform, and
+        says when it is a test key.</p>
       <img src="screenshot_settings.png" class="img-fluid" alt="The MPS provider settings"
         style="border: 1px solid #dbe3ec; border-radius: 10px;">
     </div>
@@ -89,13 +89,15 @@
       <ol style="padding-left: 20px;">
         <li>Install the module, then open Website › Configuration › Payment Providers › MPS (or the same menu
           under Invoicing).</li>
-        <li>On the Configuration tab, paste the client ID and client secret from the MPS platform (Online ›
-          Get started), and the webhook signing secret shown with them.</li>
+        <li>On the Configuration tab, paste the API key from the MPS platform (Online › Get started), and the
+          webhook signing secret shown with it.</li>
         <li>Tick Live and save. Saving checks the key with MPS and refuses one MPS does not accept.</li>
         <li>Publish the provider. MPS is offered at checkout for orders in euro.</li>
       </ol>
-      <p>A client ID starting with <code>test_</code> is a test key: it works for 24 hours and accepts only the MPS
-        test cards. Replace it with your live key to take real payments.</p>
+      <p>An API key starting with <code>mps_test_</code> is a test key: it accepts only the
+        MPS test cards. Replace it with your live key to take real payments.</p>
+      <p>The module connects with an API key only. A provider set up with a client ID and secret before MPS
+        issued API keys needs an API key pasted to take payments again.</p>
     </div>
     <div class="col-md-6" style="margin-bottom: 24px;">
       <h3 style="color: #0E3F78; font-weight: 400;">Requirements</h3>
@@ -108,7 +110,10 @@
       </ul>
       <h3 style="color: #0E3F78; font-weight: 400; margin-top: 24px;">Good to know</h3>
       <ul style="padding-left: 20px;">
-        <li>Refunds are made in MPS, not from Odoo.</li>
+        <li>Refund from Odoo, in full or in parts, with the Refund button on a confirmed payment. Your API key
+          needs the <code>payments:refund</code> permission: a test key always has it, a production key only
+          when MPS granted it, so ask MPS when you request your key. MPS holds every refund for 4 hours before
+          sending it; until then it can still be canceled in MPS.</li>
         <li>Saved cards and payment tokens are not supported: the shopper pays on the MPS page each time.</li>
       </ul>
     </div>
@@ -123,7 +128,7 @@
       your MPS credentials and save the provider.</p>
     <p>From then on, the module sends MPS:</p>
     <ul style="padding-left: 20px;">
-      <li>your client ID and secret, to obtain an access token;</li>
+      <li>your API key, with every call;</li>
       <li>for each payment: the amount, the Odoo transaction reference (for example S00012), and your shop's
         return and notification addresses;</li>
       <li>the MPS payment reference, to read back whether that payment was made.</li>

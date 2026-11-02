@@ -58,7 +58,7 @@ Or with Composer, using the zip as an artifact repository (put it in a folder of
 
 ```bash
 composer config repositories.mps artifact /path/to/folder-with-the-zip
-composer require mps/module-payments
+composer require mobilepaymentsolutions/module-payments
 bin/magento setup:upgrade
 ```
 
@@ -71,7 +71,7 @@ Then, in the admin:
 Magento's cron has to be running, as for any production shop.
 
 **Update:** unzip the new zip over `app/code/Mps/Payments`, or put it in the artifact folder and run
-`composer update mps/module-payments`; then `bin/magento setup:upgrade`.
+`composer update mobilepaymentsolutions/module-payments`; then `bin/magento setup:upgrade`.
 
 ## PrestaShop
 

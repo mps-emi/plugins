@@ -14,10 +14,11 @@
  * @license   https://opensource.org/licenses/AFL-3.0 Academic Free License version 3.0
  */
 /**
- * The MPS payments gateway, as this module uses it: a token, create an internet payment, read it back.
+ * The MPS payments gateway, as this module uses it: create an internet payment, read it back, refund it.
  *
  * Everything else about the merchant — which wallet, which shop name the shopper sees — comes from the
- * credentials, never from a request, so there is nothing here to configure beyond them.
+ * API key, never from a request, so there is nothing here to configure beyond it. The key is the bearer of
+ * every call; there is no token to fetch.
  */
 if (!defined('_PS_VERSION_')) {
     exit;
@@ -25,48 +26,61 @@ if (!defined('_PS_VERSION_')) {
 
 class MpsPaymentsApi
 {
-    const SCOPES = 'internet:create internet:read';
-
     const TIMEOUT = 20;
+
+    /** What a test API key starts with; a live one starts mps_live_. */
+    const TEST_API_KEY_PREFIX = 'mps_test_';
+
+    /** A payment reference no payment has, read to prove an API key: MPS answers 404 to a key it accepts. */
+    const CREDENTIAL_CHECK_REFERENCE = 'mps-credential-check';
 
     /** @var string */
     private $baseUrl;
 
-    /** @var string */
-    private $clientId;
-
-    /** @var string */
-    private $clientSecret;
+    /** @var string The API key, sent as the bearer on every call. */
+    private $apiKey;
 
     /** @var callable */
     private $log;
 
     /**
-     * @param string   $baseUrl      The gateway, e.g. https://gateway.mps-emi.com.
-     * @param string   $clientId     The API client id (a test key's starts with test_).
-     * @param string   $clientSecret Its secret.
-     * @param callable $log          Receives ( message, severity ): 1 worked, 2 refused, 3 no answer.
+     * @param string   $baseUrl The gateway, e.g. https://gateway.mps-emi.com.
+     * @param string   $apiKey  The API key: mps_live_…, or mps_test_… for a test key.
+     * @param callable $log     Receives ( message, severity ): 1 worked, 2 refused, 3 no answer.
      */
-    public function __construct($baseUrl, $clientId, $clientSecret, callable $log)
+    public function __construct($baseUrl, $apiKey, callable $log)
     {
         $this->baseUrl = rtrim($baseUrl, '/');
-        $this->clientId = $clientId;
-        $this->clientSecret = $clientSecret;
+        $this->apiKey = trim((string) $apiKey);
         $this->log = $log;
     }
 
     /**
-     * Opens a payment on the hosted checkout.
+     * Opens a payment on the hosted checkout. Sent again with the same key and body, MPS answers with the
+     * payment the first send opened, never a second one.
      *
-     * @param array $body amount (cents), reference, successUrl, failureUrl and optionally callbackUrl.
+     * @param array  $body           amount (cents), reference, successUrl, failureUrl and optionally callbackUrl.
+     * @param string $idempotencyKey The checkout attempt's (MpsPaymentsRepository::newIdempotencyKey).
      *
      * @return array paymentReference and checkoutUrl.
      *
      * @throws Exception When the gateway refuses or cannot be reached.
      */
-    public function createPayment(array $body)
+    public function createPayment(array $body, $idempotencyKey)
     {
-        return $this->call('POST', '/api/payments/internet/create', $body);
+        $headers = ['Idempotency-Key: ' . $idempotencyKey];
+
+        try {
+            return $this->call('POST', '/api/payments/internet/create', $body, $headers);
+        } catch (Exception $e) {
+            // 409: MPS is still opening the payment for the first send with this key; once more, a second later.
+            if (409 !== $e->getCode()) {
+                throw $e;
+            }
+            sleep(1);
+
+            return $this->call('POST', '/api/payments/internet/create', $body, $headers);
+        }
     }
 
     /**
@@ -84,117 +98,128 @@ class MpsPaymentsApi
     }
 
     /**
-     * Fetches a fresh token, bypassing the cache — proves the credentials when they are saved.
+     * Refunds a payment, in full or in part: POST /api/payments/{paymentReference}/refunds. Unlike the
+     * other calls it does not throw on a refusal: what MPS answered is the outcome (MpsPaymentsRefund::outcome).
      *
-     * @throws Exception When the credentials are refused.
+     * @param string $paymentReference The payment to refund, as returned by create.
+     * @param array  $body             amount (cents) and reason (MpsPaymentsRefund::body).
+     * @param string $idempotencyKey   The same for a resend of the same refund (MpsPaymentsRefund::idempotencyKey).
+     *
+     * @return array [HTTP status, decoded response body]
+     *
+     * @throws Exception When the gateway cannot be reached.
+     */
+    public function createRefund($paymentReference, array $body, $idempotencyKey)
+    {
+        list($status, $answer) = $this->exchange('POST', '/api/payments/' . rawurlencode($paymentReference) . '/refunds', $body, ['Idempotency-Key: ' . $idempotencyKey]);
+
+        return [$status, $answer];
+    }
+
+    /**
+     * Proves the API key when it is saved. There is no token to fetch, so a payment that does not exist is
+     * read with it instead: 404 means MPS accepted the key.
+     *
+     * @throws Exception When there is no key, or MPS refuses it.
      */
     public function verifyCredentials()
     {
-        Configuration::deleteByName($this->tokenKey());
-        $this->token();
+        if ('' === $this->apiKey) {
+            throw new Exception('no API key');
+        }
+
+        try {
+            $this->getPayment(self::CREDENTIAL_CHECK_REFERENCE);
+        } catch (Exception $e) {
+            if (404 === $e->getCode()) {
+                return;
+            }
+            if (in_array($e->getCode(), [401, 403], true)) {
+                throw new Exception(sprintf('MPS refused the API key (%d)', $e->getCode()));
+            }
+            throw $e;
+        }
+    }
+
+    /**
+     * Whether an API key is a test key: it starts mps_test_. A test key accepts only the MPS test cards,
+     * charges nothing.
+     *
+     * @param string $apiKey
+     *
+     * @return bool
+     */
+    public static function isTestKey($apiKey)
+    {
+        return 0 === strpos((string) $apiKey, self::TEST_API_KEY_PREFIX);
     }
 
     /**
      * @param string     $method HTTP method.
      * @param string     $path   Path under the gateway.
-     * @param array|null $body   JSON body, if any.
-     * @param bool       $retry  Whether a 401 may fetch a new token and try once more.
+     * @param array|null $body    JSON body, if any.
+     * @param array      $headers Extra headers.
      *
      * @return array The response's data.
      *
      * @throws Exception On anything other than 2xx.
      */
-    private function call($method, $path, $body = null, $retry = true)
+    private function call($method, $path, $body = null, array $headers = [])
     {
-        $headers = ['Authorization: Bearer ' . $this->token(), 'Accept: application/json'];
+        list($status, $decoded) = $this->exchange($method, $path, $body, $headers);
+
+        if ($status < 200 || $status >= 300) {
+            throw new Exception(sprintf('MPS gateway answered %d on %s %s', $status, $method, $path), $status);
+        }
+
+        return isset($decoded['data']) && is_array($decoded['data']) ? $decoded['data'] : [];
+    }
+
+    /**
+     * One request, logged, whatever its status.
+     *
+     * @param string     $method  HTTP method.
+     * @param string     $path    Path under the gateway.
+     * @param array|null $body    JSON body, if any.
+     * @param array      $headers Extra headers.
+     *
+     * @return array [HTTP status, decoded response body (an empty array when it is not JSON)]
+     *
+     * @throws Exception When the gateway cannot be reached.
+     */
+    private function exchange($method, $path, $body = null, array $headers = [])
+    {
+        $sent = array_merge(['Authorization: Bearer ' . $this->apiKey, 'Accept: application/json'], $headers);
         if (null !== $body) {
-            $headers[] = 'Content-Type: application/json';
+            $sent[] = 'Content-Type: application/json';
         }
 
         $started = microtime(true);
-        list($status, $responseBody, $error) = $this->send($method, $this->baseUrl . $path, $headers, null === $body ? null : json_encode($body, JSON_UNESCAPED_SLASHES));
+        list($status, $responseBody, $error) = $this->send($method, $this->baseUrl . $path, $sent, null === $body ? null : json_encode($body, JSON_UNESCAPED_SLASHES));
         $elapsed = (int) round((microtime(true) - $started) * 1000);
 
         if (null !== $error) {
-            $this->log(sprintf('%s %s failed after %d ms: %s', $method, $path, $elapsed, $error), 3);
+            $this->log(sprintf('%s %s failed after %d ms%s: %s', $method, $path, $elapsed, self::idempotencyKey($headers), $error), 3);
             throw new Exception('MPS gateway unreachable: ' . $error);
         }
 
-        // A token can expire between being cached and being used; one new token, one retry.
-        if (401 === $status && $retry) {
-            Configuration::deleteByName($this->tokenKey());
-
-            return $this->call($method, $path, $body, false);
-        }
+        $decoded = json_decode($responseBody, true);
+        $decoded = is_array($decoded) ? $decoded : [];
 
         if ($status < 200 || $status >= 300) {
-            $this->log(sprintf('%s %s answered %d in %d ms: %s', $method, $path, $status, $elapsed, $responseBody), 2);
-            throw new Exception(sprintf('MPS gateway answered %d on %s %s', $status, $method, $path));
+            $this->log(sprintf('%s %s answered %d in %d ms%s: %s', $method, $path, $status, $elapsed, self::idempotencyKey($headers), $responseBody), 2);
+        } else {
+            $data = isset($decoded['data']) && is_array($decoded['data']) ? $decoded['data'] : [];
+            $this->log(sprintf('%s %s answered %d in %d ms%s%s', $method, $path, $status, $elapsed, self::idempotencyKey($headers), self::describe($body, $data)), 1);
         }
 
-        $decoded = json_decode($responseBody, true);
-        $data = is_array($decoded) && isset($decoded['data']) && is_array($decoded['data']) ? $decoded['data'] : [];
-
-        $this->log(sprintf('%s %s answered %d in %d ms%s', $method, $path, $status, $elapsed, self::describe($body, $data)), 1);
-
-        return $data;
-    }
-
-    /**
-     * A token for these credentials, from the cache while it lasts. The token endpoint is rate limited
-     * far more tightly than the payment endpoints; one token serves every payment for 15 minutes.
-     *
-     * @return string
-     *
-     * @throws Exception When the credentials are refused.
-     */
-    private function token()
-    {
-        $cached = json_decode((string) Configuration::getGlobalValue($this->tokenKey()), true);
-        if (is_array($cached) && isset($cached['token'], $cached['expires']) && $cached['expires'] > time()) {
-            return $cached['token'];
-        }
-
-        list($status, $responseBody, $error) = $this->send('POST', $this->baseUrl . '/connect/token', ['Content-Type: application/x-www-form-urlencoded'], http_build_query([
-            'grant_type' => 'client_credentials',
-            'client_id' => $this->clientId,
-            'client_secret' => $this->clientSecret,
-            'scope' => self::SCOPES,
-        ]));
-
-        if (null !== $error) {
-            $this->log('Token request failed: ' . $error, 3);
-            throw new Exception('MPS gateway unreachable: ' . $error);
-        }
-
-        $decoded = json_decode($responseBody, true);
-
-        if (200 !== $status || empty($decoded['access_token'])) {
-            $this->log(sprintf('Token request for %s answered %d: %s', $this->clientId, $status, $responseBody), 2);
-            throw new Exception(sprintf('MPS refused the credentials (%d)', $status));
-        }
-
-        $lifetime = isset($decoded['expires_in']) ? (int) $decoded['expires_in'] : 900;
-        $this->log(sprintf('New token for %s, valid %d s', $this->clientId, $lifetime), 1);
-
-        // Expire a minute early so a token is never handed out in its last seconds.
-        Configuration::updateGlobalValue($this->tokenKey(), json_encode(['token' => $decoded['access_token'], 'expires' => time() + max(60, $lifetime - 60)]));
-
-        return $decoded['access_token'];
-    }
-
-    /**
-     * Keyed by gateway, client and secret, so changing any of them never reuses a token for the old ones.
-     */
-    private function tokenKey()
-    {
-        return 'MPS_PAYMENTS_TOKEN_' . strtoupper(substr(hash('sha256', $this->baseUrl . '|' . $this->clientId . '|' . $this->clientSecret), 0, 16));
+        return [$status, $decoded];
     }
 
     /**
      * @return array [status, body, error or null]
      */
-    private function send($method, $url, array $headers, $body)
+    protected function send($method, $url, array $headers, $body)
     {
         $curl = curl_init($url);
         curl_setopt_array($curl, [
@@ -220,24 +245,40 @@ class MpsPaymentsApi
     }
 
     /**
-     * What a successful call was about, for the log. Deliberately a whitelist: the token, the secrets,
-     * checkoutUrl (which pays the payment) and the return URLs never appear.
+     * What a successful call was about, for the log. Deliberately a whitelist: the API key, the secrets, checkoutUrl (which pays the payment) and the return URLs never appear.
      */
     private static function describe($request, array $response)
     {
         $parts = [];
 
-        if (is_array($request)) {
+        if (is_array($request) && isset($request['reference'])) {
             $parts[] = sprintf('amount %d, reference %s, webhook %s', $request['amount'], $request['reference'], isset($request['callbackUrl']) ? 'yes' : 'no');
+        } elseif (is_array($request) && isset($request['reason'])) {
+            $parts[] = sprintf('refund of %d', $request['amount']);
         }
 
-        foreach (['paymentReference', 'state', 'amount', 'currency'] as $field) {
+        foreach (['paymentReference', 'state', 'refundId', 'status', 'amount', 'currency', 'cancelableUntil'] as $field) {
             if (isset($response[$field]) && is_scalar($response[$field])) {
                 $parts[] = $field . ' ' . $response[$field];
             }
         }
 
         return empty($parts) ? '' : ': ' . implode(', ', $parts);
+    }
+
+    /**
+     * The Idempotency-Key a call carried, for the log: not a secret, and what MPS names in a 400 for a key
+     * reused with another body.
+     */
+    private static function idempotencyKey(array $headers)
+    {
+        foreach ($headers as $header) {
+            if (0 === strpos($header, 'Idempotency-Key: ')) {
+                return ', key ' . substr($header, strlen('Idempotency-Key: '));
+            }
+        }
+
+        return '';
     }
 
     private function log($message, $severity)

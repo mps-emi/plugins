@@ -52,7 +52,7 @@ from a tree that `./build.sh` has not built.
 The screenshots run against `dev/fake-gateway.php`, and none of them shows its page: it is not MPS. The
 settings screenshot hides the Advanced group, whose Gateway field holds the fake one's address.
 
-The page names the external service and lists exactly what the module sends (the client credentials, per
+The page names the external service and lists exactly what the module sends (the API key, per
 payment the amount, the transaction reference and the shop's return and notification addresses, and the
 payment reference to read it back), and that nothing is sent before the merchant saves their credentials:
 the rules ask for both. The module has no activation key and installs by copying the folder into the

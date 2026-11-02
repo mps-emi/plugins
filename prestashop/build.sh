@@ -41,7 +41,7 @@ done
 echo "== zip $version"
 rm -rf "$dist"
 mkdir -p "$dist"
-(cd "$here" && zip -qrX "$dist/mpspayments-$version.zip" mpspayments -x '*/.*')
+(cd "$here" && zip -qrX "$dist/mpspayments-$version.zip" mpspayments -x '*/.*' 'mpspayments/config.xml' 'mpspayments/config_*.xml')
 cp "$dist/mpspayments-$version.zip" "$dist/mpspayments.zip"
 
 echo "== done"

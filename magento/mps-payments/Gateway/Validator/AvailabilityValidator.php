@@ -9,7 +9,8 @@ use Magento\Payment\Gateway\Validator\ResultInterfaceFactory;
 use Mps\Payments\Model\Config;
 
 /**
- * Without a client ID and secret there is nothing to pay with; the method is not offered.
+ * Without an API key there is nothing to pay with; the method is not offered. A client ID and secret are not
+ * enough (the admin says so: Model\System\MissingApiKey).
  */
 class AvailabilityValidator extends AbstractValidator
 {

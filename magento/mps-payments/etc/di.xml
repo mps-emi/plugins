@@ -1,6 +1,7 @@
 <?xml version="1.0"?>
 <config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <!-- The payment method: Magento's gateway adapter, with one command — put the new order on pending payment. -->
+    <!-- The payment method: Magento's gateway adapter, with two commands — put the new order on pending payment,
+         and refund a credit memo online. -->
     <virtualType name="MpsPaymentsFacade" type="Magento\Payment\Model\Method\Adapter">
         <arguments>
             <argument name="code" xsi:type="const">Mps\Payments\Model\Config::METHOD_CODE</argument>
@@ -59,6 +60,7 @@
         <arguments>
             <argument name="commands" xsi:type="array">
                 <item name="initialize" xsi:type="string">Mps\Payments\Gateway\Command\InitializeCommand</item>
+                <item name="refund" xsi:type="string">Mps\Payments\Gateway\Command\RefundCommand</item>
             </argument>
         </arguments>
     </virtualType>

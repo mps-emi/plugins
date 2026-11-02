@@ -1,5 +1,24 @@
 *** MPS Payments for WooCommerce Changelog ***
 
+2026-10-31 - version 1.0.0
+* Breaking for a shop without an API key: the plugin connects with the API key only. The client ID and secret of a shop set up before MPS issued API keys no longer connect, and the update deletes them, and the tokens bought with them, from the shop. Such a shop is not offered at checkout until an API key is pasted; the admin screens say so. Get the API key and the webhook signing secret from the MPS platform (Online › Get started).
+* Refunds use MPS's refund address under the payment (/api/payments/{paymentReference}/refunds); the former address is gone. Nothing changes in WooCommerce.
+
+2026-10-31 - version 0.3.2
+* The plugin's own checks of an open payment now run 10 minutes, 30 minutes, 1 hour and 6 hours after it was opened, as documented. Each waited the full delay after the previous check, so they ran at 10 minutes, 40 minutes, 1 hour 40 and 7 hours 40.
+
+2026-10-30 - version 0.3.1
+* Opening a payment sends an Idempotency-Key, one per checkout attempt: a double-submitted checkout, or placing the order again after MPS did not answer, gets the payment MPS already opened instead of a second one. Paying again after a failed or abandoned payment, or with a changed total, opens a new payment.
+
+2026-10-30 - version 0.3.0
+* Refunds from WooCommerce: the order screen's refund button refunds the payment through MPS, in full or in part. The order note names the MPS refund. MPS holds every refund for 4 hours before sending it; it can be canceled in MPS until then, and the note says until when.
+* Refunds need the payments:refund scope on the API key: a test key always holds it, a live key only when MPS granted it. Without it the refund is refused with a message saying so.
+* With the webhook signing secret pasted, MPS tells the shop how each refund ended: paid out is noted on the order; failed or canceled removes the WooCommerce refund, puts a fully refunded order back to its status before, and the amount can be refunded again.
+
+2026-10-29 - version 0.2.0
+* Connects with an MPS API key: one value to paste, sent with every call, no token to fetch. A test key starts with mps_test_.
+* A shop set up with a client ID and secret goes on working unchanged; they are used while the API key is empty.
+
 2026-10-22 - version 0.1.0
 * First release: payments on the MPS-hosted checkout, block and classic checkout, Dutch, French and English.
 * Payment notifications are acted on only when they carry a valid signature; without a webhook signing secret they are ignored and orders are settled by the plugin's own checks.

@@ -54,12 +54,13 @@ class Outcome
     }
 
     /**
-     * An amount in euros as MPS takes it: whole cents.
+     * An amount in euros as MPS takes it: whole cents. Rounded to the cent first, so a float just under a
+     * half cent (1.005 is 1.00499… as a float) still rounds as written.
      *
      * @param float|string $amount
      */
     public static function cents(float|string $amount): int
     {
-        return (int) round((float) $amount * 100);
+        return (int) round(round((float) $amount, 2) * 100);
     }
 }

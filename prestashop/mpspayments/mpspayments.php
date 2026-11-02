@@ -31,6 +31,8 @@ require_once __DIR__ . '/classes/MpsPaymentsRepository.php';
 require_once __DIR__ . '/classes/MpsPaymentsSettlement.php';
 require_once __DIR__ . '/classes/MpsPaymentsGatewayUrl.php';
 require_once __DIR__ . '/classes/MpsPaymentsOrderCheck.php';
+require_once __DIR__ . '/classes/MpsPaymentsRefund.php';
+require_once __DIR__ . '/classes/MpsPaymentsRefunder.php';
 
 use PrestaShop\PrestaShop\Core\Payment\PaymentOption;
 
@@ -38,9 +40,8 @@ class MpsPayments extends PaymentModule
 {
     const DEFAULT_GATEWAY_URL = 'https://gateway.mps-emi.com';
 
-    /** Settings, per shop. The secrets are never shown again once saved. */
-    const CLIENT_ID = 'MPS_PAYMENTS_CLIENT_ID';
-    const CLIENT_SECRET = 'MPS_PAYMENTS_CLIENT_SECRET';
+    /** Settings, per shop. The API key and the webhook secret are never shown again once saved. */
+    const API_KEY = 'MPS_PAYMENTS_API_KEY';
     const WEBHOOK_SECRET = 'MPS_PAYMENTS_WEBHOOK_SECRET';
     const GATEWAY_URL = 'MPS_PAYMENTS_GATEWAY_URL';
     const DEBUG = 'MPS_PAYMENTS_DEBUG';
@@ -54,7 +55,7 @@ class MpsPayments extends PaymentModule
     {
         $this->name = 'mpspayments';
         $this->tab = 'payments_gateways';
-        $this->version = '0.1.0';
+        $this->version = '1.0.0';
         $this->author = 'Mobile Payment Solutions';
         $this->need_instance = 0;
         $this->ps_versions_compliancy = ['min' => '8.0.0', 'max' => '9.99.99'];
@@ -66,6 +67,11 @@ class MpsPayments extends PaymentModule
 
         $this->displayName = $this->trans('MPS Payments', [], 'Modules.Mpspayments.Admin');
         $this->description = $this->trans('Take payments in your PrestaShop shop on the MPS-hosted checkout page.', [], 'Modules.Mpspayments.Admin');
+
+        // Module Manager shows it on the module: a shop upgraded from a client ID and secret has no key.
+        if ($this->id && !$this->isUsable(null)) {
+            $this->warning = $this->notConfigured();
+        }
     }
 
     public function isUsingNewTranslationSystem()
@@ -83,22 +89,21 @@ class MpsPayments extends PaymentModule
         }
 
         return parent::install()
-            && $this->registerHook(['paymentOptions', 'displayPaymentReturn'])
+            && $this->registerHook(['paymentOptions', 'displayPaymentReturn', 'actionOrderSlipAdd'])
             && MpsPaymentsRepository::createTable()
             && Configuration::updateGlobalValue(self::GATEWAY_URL, self::DEFAULT_GATEWAY_URL)
             && Configuration::updateGlobalValue(self::CRON_TOKEN, bin2hex(random_bytes(16)));
     }
 
     /**
-     * Removes the settings, cached tokens and the payment attempts. Orders stay: they are the shop's
-     * records, not the module's.
+     * Removes the settings and the payment attempts. Orders stay: they are the shop's records, not the
+     * module's.
      */
     public function uninstall()
     {
-        foreach ([self::CLIENT_ID, self::CLIENT_SECRET, self::WEBHOOK_SECRET, self::GATEWAY_URL, self::DEBUG, self::TITLE, self::DESCRIPTION, self::CRON_TOKEN] as $key) {
+        foreach ([self::API_KEY, self::WEBHOOK_SECRET, self::GATEWAY_URL, self::DEBUG, self::TITLE, self::DESCRIPTION, self::CRON_TOKEN] as $key) {
             Configuration::deleteByName($key);
         }
-        Db::getInstance()->delete('configuration', "name LIKE 'MPS\\_PAYMENTS\\_TOKEN\\_%'");
 
         return MpsPaymentsRepository::dropTable() && parent::uninstall();
     }
@@ -140,6 +145,53 @@ class MpsPayments extends PaymentModule
     }
 
     /**
+     * A credit slip was made for an order — a partial refund, a standard refund or a product return: an MPS
+     * order's slip is refunded in MPS (MpsPaymentsRefunder), and the employee sees what MPS answered.
+     */
+    public function hookActionOrderSlipAdd($params)
+    {
+        if (!isset($params['order']) || !Validate::isLoadedObject($params['order'])) {
+            return;
+        }
+
+        $result = (new MpsPaymentsRefunder($this))->refund($params['order'], isset($params['orderSlipCreated']) ? $params['orderSlipCreated'] : null);
+        if (null !== $result) {
+            $this->flash($result[0], $result[1]);
+        }
+    }
+
+    /**
+     * A message on the next back-office page (the order page PrestaShop redirects to after the refund).
+     *
+     * @param string $type success, warning or error
+     */
+    private function flash($type, $message)
+    {
+        try {
+            $container = PrestaShop\PrestaShop\Adapter\SymfonyContainer::getInstance();
+            $request = null !== $container ? $container->get('request_stack')->getCurrentRequest() : null;
+            if (null !== $request && $request->hasSession()) {
+                $request->getSession()->getFlashBag()->add($type, $message);
+
+                return;
+            }
+        } catch (Exception $e) {
+            // No Symfony request: the legacy controller's own messages below.
+        }
+
+        $controller = $this->context->controller;
+        if ($controller instanceof AdminController) {
+            if ('error' === $type) {
+                $controller->errors[] = $message;
+            } elseif ('warning' === $type) {
+                $controller->warnings[] = $message;
+            } else {
+                $controller->confirmations[] = $message;
+            }
+        }
+    }
+
+    /**
      * @param string $template Under views/templates/, e.g. hook/payment_return.tpl.
      */
     private function render($template, array $variables)
@@ -150,16 +202,15 @@ class MpsPayments extends PaymentModule
     }
 
     /**
-     * The settings page: save, prove the credentials with a real token request, show the form.
+     * The settings page: save, prove the API key with a real call to MPS, show the form.
      */
     public function getContent()
     {
         $output = '';
 
         if (Tools::isSubmit('submitMpsPayments')) {
-            Configuration::updateValue(self::CLIENT_ID, trim((string) Tools::getValue(self::CLIENT_ID)));
             // A password field comes back empty when it was not touched: keep what is stored.
-            foreach ([self::CLIENT_SECRET, self::WEBHOOK_SECRET] as $secret) {
+            foreach ([self::API_KEY, self::WEBHOOK_SECRET] as $secret) {
                 $value = trim((string) Tools::getValue($secret));
                 if ('' !== $value) {
                     Configuration::updateValue($secret, $value);
@@ -184,11 +235,24 @@ class MpsPayments extends PaymentModule
             $output .= $this->verifyCredentials();
         }
 
+        if (!$this->isUsable(null)) {
+            $output .= $this->displayWarning($this->notConfigured());
+        }
+
         return $output . $this->renderForm();
     }
 
     /**
-     * @return string A confirmation or an error to show above the form, or nothing without credentials.
+     * Without an API key MPS is not offered; a shop set up with a client ID and secret before 1.0.0 lost them
+     * on the upgrade and is in that state until a key is saved.
+     */
+    private function notConfigured()
+    {
+        return $this->trans('Not configured: MPS is not offered at checkout until an API key is saved. Paste it from the MPS platform (Online › Get started). A client ID and secret are no longer used.', [], 'Modules.Mpspayments.Admin');
+    }
+
+    /**
+     * @return string A confirmation or an error to show above the form, or nothing without an API key.
      */
     private function verifyCredentials()
     {
@@ -204,7 +268,7 @@ class MpsPayments extends PaymentModule
 
         return $this->displayConfirmation(
             $this->isTestKey(null)
-                ? $this->trans('Connected to MPS with a test key. It works for 24 hours and accepts only the MPS test cards; no card is charged.', [], 'Modules.Mpspayments.Admin')
+                ? $this->trans('Connected to MPS with a test key. It accepts only the MPS test cards; no card is charged.', [], 'Modules.Mpspayments.Admin')
                 : $this->trans('Connected to MPS.', [], 'Modules.Mpspayments.Admin')
         );
     }
@@ -213,6 +277,7 @@ class MpsPayments extends PaymentModule
     {
         $cronUrl = $this->context->link->getModuleLink($this->name, 'cron', ['token' => Configuration::getGlobalValue(self::CRON_TOKEN)], true);
         $hasWebhookSecret = '' !== (string) Configuration::get(self::WEBHOOK_SECRET);
+        $saved = $this->trans('Saved. Leave empty to keep it.', [], 'Modules.Mpspayments.Admin');
 
         $gatewayField = [
             'type' => 'text',
@@ -233,22 +298,17 @@ class MpsPayments extends PaymentModule
                     . ' ' . $this->trans('This payment method sends the order amount, order number and your shop\'s return addresses to MPS (Mobile Payment Solutions) to open each payment.', [], 'Modules.Mpspayments.Admin'),
                 'input' => [
                     [
-                        'type' => 'text',
-                        'label' => $this->trans('Client ID', [], 'Modules.Mpspayments.Admin'),
-                        'name' => self::CLIENT_ID,
-                        'desc' => $this->trans('Paste the client ID, secret and webhook signing secret from the MPS platform (Online › Get started). A test key, whose client ID starts with test_, works for 24 hours and accepts only the MPS test cards: no card is charged and nothing is paid out.', [], 'Modules.Mpspayments.Admin'),
-                    ],
-                    [
                         'type' => 'password',
-                        'label' => $this->trans('Client secret', [], 'Modules.Mpspayments.Admin'),
-                        'name' => self::CLIENT_SECRET,
-                        'desc' => '' !== (string) Configuration::get(self::CLIENT_SECRET) ? $this->trans('Saved. Leave empty to keep it.', [], 'Modules.Mpspayments.Admin') : '',
+                        'label' => $this->trans('API key', [], 'Modules.Mpspayments.Admin'),
+                        'name' => self::API_KEY,
+                        'desc' => ('' !== (string) Configuration::get(self::API_KEY) ? $saved . ' ' : '')
+                            . $this->trans('Paste the API key and the webhook signing secret from the MPS platform (Online › Get started). A test key, which starts with mps_test_, accepts only the MPS test cards: no card is charged and nothing is paid out.', [], 'Modules.Mpspayments.Admin'),
                     ],
                     [
                         'type' => 'password',
                         'label' => $this->trans('Webhook signing secret', [], 'Modules.Mpspayments.Admin'),
                         'name' => self::WEBHOOK_SECRET,
-                        'desc' => ($hasWebhookSecret ? $this->trans('Saved. Leave empty to keep it.', [], 'Modules.Mpspayments.Admin') . ' ' : '')
+                        'desc' => ($hasWebhookSecret ? $saved . ' ' : '')
                             . $this->trans('Shown with your key in the MPS platform. Payment notifications are only acted on when their signature matches; without a secret they are ignored and orders are settled by the module\'s own checks.', [], 'Modules.Mpspayments.Admin'),
                     ],
                     [
@@ -298,8 +358,7 @@ class MpsPayments extends PaymentModule
         $helper->submit_action = 'submitMpsPayments';
         $helper->default_form_language = (int) $this->context->language->id;
         $helper->fields_value = [
-            self::CLIENT_ID => Configuration::get(self::CLIENT_ID),
-            self::CLIENT_SECRET => '',
+            self::API_KEY => '',
             self::WEBHOOK_SECRET => '',
             'clear_webhook_secret' => 0,
             self::GATEWAY_URL => $this->gatewayUrl(null),
@@ -320,7 +379,7 @@ class MpsPayments extends PaymentModule
     }
 
     /**
-     * A client for the gateway with the given shop's credentials.
+     * A client for the gateway with the given shop's API key.
      *
      * @param int|null $idShop
      *
@@ -332,8 +391,7 @@ class MpsPayments extends PaymentModule
 
         return new MpsPaymentsApi(
             $this->gatewayUrl($idShop),
-            (string) Configuration::get(self::CLIENT_ID, null, null, $idShop),
-            (string) Configuration::get(self::CLIENT_SECRET, null, null, $idShop),
+            trim((string) Configuration::get(self::API_KEY, null, null, $idShop)),
             static function ($message, $severity) use ($module, $idShop) {
                 $module->log($message, $severity, $idShop);
             }
@@ -370,20 +428,19 @@ class MpsPayments extends PaymentModule
     }
 
     /**
-     * Without a client ID and secret there is nothing to pay with; the option is not offered.
+     * Without an API key there is nothing to pay with; the option is not offered.
      */
     public function isUsable($idShop)
     {
-        return '' !== trim((string) Configuration::get(self::CLIENT_ID, null, null, $idShop))
-            && '' !== trim((string) Configuration::get(self::CLIENT_SECRET, null, null, $idShop));
+        return '' !== trim((string) Configuration::get(self::API_KEY, null, null, $idShop));
     }
 
     /**
-     * A test key is simulated: it accepts only the MPS test cards, charges nothing, and stops working after 24 hours.
+     * A test key is simulated: it accepts only the MPS test cards, charges nothing.
      */
     public function isTestKey($idShop)
     {
-        return 0 === strpos((string) Configuration::get(self::CLIENT_ID, null, null, $idShop), 'test_');
+        return MpsPaymentsApi::isTestKey(trim((string) Configuration::get(self::API_KEY, null, null, $idShop)));
     }
 
     /**

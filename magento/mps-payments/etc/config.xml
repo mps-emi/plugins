@@ -7,7 +7,7 @@
                 <model>MpsPaymentsFacade</model>
                 <title>MPS</title>
                 <instructions>Pay by card or with your banking app on the secure MPS payment page.</instructions>
-                <client_secret backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
+                <api_key backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
                 <webhook_secret backend_model="Magento\Config\Model\Config\Backend\Encrypted"/>
                 <gateway_url>https://gateway.mps-emi.com</gateway_url>
                 <debug>0</debug>
@@ -18,6 +18,9 @@
                 <can_initialize>1</can_initialize>
                 <can_use_checkout>1</can_use_checkout>
                 <can_use_internal>0</can_use_internal>
+                <!-- A credit memo on an MPS invoice is refunded online (Gateway\Command\RefundCommand), in full or in part. -->
+                <can_refund>1</can_refund>
+                <can_refund_partial_per_invoice>1</can_refund_partial_per_invoice>
                 <!-- A placed order is not confirmed by e-mail until MPS says it is paid. -->
                 <order_place_redirect_url>1</order_place_redirect_url>
                 <!-- Shown with the payment on the order (Block\Info), in the admin and to the shopper alike. -->

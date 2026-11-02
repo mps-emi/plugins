@@ -14,21 +14,25 @@
                     colspan="2"
                     invisible="code != 'mps' or not mps_is_test_key"
                 >
-                    This is a test key. It works for 24 hours and accepts only the MPS test cards: no card is charged and nothing is paid out.
+                    This is a test key. It accepts only the MPS test cards: no card is charged and nothing is paid out.
                 </div>
             </group>
             <group name="provider_credentials" position="inside">
+                <field name="mps_has_api_key" invisible="1"/>
+                <div
+                    class="alert alert-warning"
+                    role="alert"
+                    colspan="2"
+                    invisible="code != 'mps' or mps_has_api_key"
+                >
+                    Paste the API key from the MPS platform (Online › Get started) to enable or publish this provider. MPS connects with an API key only: a client ID and secret from an earlier setup are no longer used.
+                </div>
                 <field
-                    name="mps_client_id"
+                    name="mps_api_key"
                     invisible="code != 'mps'"
-                    required="code == 'mps' and is_live"
-                    placeholder="test_BE0000000000"
-                />
-                <field
-                    name="mps_client_secret"
-                    invisible="code != 'mps'"
-                    required="code == 'mps' and is_live"
+                    required="code == 'mps' and (is_live or is_published)"
                     widget="password"
+                    placeholder="mps_live_…"
                 />
                 <div class="text-muted" colspan="2" invisible="code != 'mps'">
                     This payment method sends the order amount, order number and your shop's return addresses to MPS (Mobile Payment Solutions) to open each payment.

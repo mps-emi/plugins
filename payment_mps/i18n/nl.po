@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 20.0-20261015\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-10-15 22:22+0000\n"
+"POT-Creation-Date: 2026-10-31 17:06+0000\n"
 "PO-Revision-Date: 2026-10-15 22:22+0000\n"
 "Last-Translator: \n"
 "Language-Team: \n"
@@ -17,19 +17,14 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #. module: payment_mps
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_api_key
+msgid "API Key"
+msgstr "API-sleutel"
+
+#. module: payment_mps
 #: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
 msgid "Advanced"
 msgstr "Geavanceerd"
-
-#. module: payment_mps
-#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_client_id
-msgid "Client ID"
-msgstr "Client-ID"
-
-#. module: payment_mps
-#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_client_secret
-msgid "Client Secret"
-msgstr "Clientgeheim"
 
 #. module: payment_mps
 #: model:ir.model.fields,field_description:payment_mps.field_payment_provider__code
@@ -49,11 +44,20 @@ msgid "Display Name"
 msgstr ""
 
 #. module: payment_mps
-#: model:ir.model.fields,help:payment_mps.field_payment_provider__mps_client_id
+#. odoo-python
+#: code:addons/payment_mps/models/payment_provider.py:0
+msgid ""
+"Fill in the API key from the MPS platform (Online › Get started) before "
+"enabling or publishing MPS. MPS connects with an API key only; a client ID "
+"and secret are no longer used."
+msgstr "Vul de API-sleutel uit het MPS-platform (Online › Aan de slag) in voordat u MPS inschakelt of publiceert. MPS verbindt alleen nog met een API-sleutel; een client-ID en clientgeheim worden niet meer gebruikt."
+
+#. module: payment_mps
+#: model:ir.model.fields,help:payment_mps.field_payment_provider__mps_api_key
 msgid ""
 "From the MPS platform, under Online › Get started. A test key starts with "
-"test_."
-msgstr "Uit het MPS-platform, onder Online › Aan de slag. Een testsleutel begint met test_."
+"mps_test_."
+msgstr "Uit het MPS-platform, onder Online › Aan de slag. Een testsleutel begint met mps_test_."
 
 #. module: payment_mps
 #: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_gateway_url
@@ -80,9 +84,9 @@ msgid "MPS"
 msgstr "MPS"
 
 #. module: payment_mps
-#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_access_token
-msgid "MPS Access Token"
-msgstr "MPS-toegangstoken"
+#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_has_api_key
+msgid "MPS API Key Set"
+msgstr "MPS API-sleutel ingevuld"
 
 #. module: payment_mps
 #: model:ir.model.fields,field_description:payment_mps.field_payment_transaction__mps_check_count
@@ -95,17 +99,28 @@ msgid "MPS Test Key"
 msgstr "MPS-testsleutel"
 
 #. module: payment_mps
-#: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_token_expiry
-msgid "MPS Token Expiry"
-msgstr "Vervaldatum MPS-token"
-
-#. module: payment_mps
 #. odoo-python
 #: code:addons/payment_mps/models/payment_transaction.py:0
 msgid ""
 "MPS approved %(approved)s of %(requested)s %(currency)s: a partial approval."
 " Check before delivering."
 msgstr "MPS keurde %(approved)s van %(requested)s %(currency)s goed: een gedeeltelijke goedkeuring. Controleer dit voor u levert."
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid ""
+"MPS cannot refund this payment right now: it has not been paid yet, or this "
+"refund is still being processed. Try again in a moment."
+msgstr "MPS kan deze betaling nu niet terugbetalen: ze is nog niet betaald, of deze terugbetaling wordt nog verwerkt. Probeer het zo meteen opnieuw."
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid ""
+"MPS could not make the refund (%s). Nothing was refunded; you can refund "
+"again."
+msgstr "MPS kon de terugbetaling niet uitvoeren (%s). Er is niets terugbetaald; u kunt opnieuw terugbetalen."
 
 #. module: payment_mps
 #. odoo-python
@@ -121,9 +136,53 @@ msgstr "MPS gaf geen betaling terug om de klant naartoe te sturen."
 
 #. module: payment_mps
 #. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid ""
+"MPS does not know this payment for this API key. A test key refunds only "
+"test payments, and a live key only live ones."
+msgstr "MPS kent deze betaling niet voor deze API-sleutel. Een testsleutel betaalt alleen testbetalingen terug, een live sleutel alleen live betalingen."
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid "MPS has not decided the refund yet. It is read again in a few minutes."
+msgstr "MPS heeft nog niet over de terugbetaling beslist. Ze wordt over enkele minuten opnieuw opgevraagd."
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid "MPS refused this refund (%s)."
+msgstr "MPS weigerde deze terugbetaling (%s)."
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid ""
+"MPS refused this refund:\n"
+"%s"
+msgstr "MPS weigerde deze terugbetaling:\n%s"
+
+#. module: payment_mps
+#. odoo-python
 #: code:addons/payment_mps/models/payment_provider.py:0
-msgid "MPS rejected the token."
-msgstr "MPS heeft het token geweigerd."
+msgid "MPS rejected the API key."
+msgstr "MPS heeft de API-sleutel geweigerd."
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid ""
+"MPS sends this refund after %(until)s (UTC). Until then it can still be "
+"canceled in MPS."
+msgstr "MPS verstuurt deze terugbetaling na %(until)s (UTC). Tot dan kan ze nog in MPS geannuleerd worden."
+
+#. module: payment_mps
+#: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
+msgid ""
+"Paste the API key from the MPS platform (Online › Get started) to enable or "
+"publish this provider. MPS connects with an API key only: a client ID and "
+"secret from an earlier setup are no longer used."
+msgstr "Plak de API-sleutel uit het MPS-platform (Online › Aan de slag) om deze provider in te schakelen of te publiceren. MPS verbindt alleen nog met een API-sleutel: een client-ID en clientgeheim van een eerdere installatie worden niet meer gebruikt."
 
 #. module: payment_mps
 #: model:ir.model,name:payment_mps.model_payment_provider
@@ -168,6 +227,26 @@ msgstr "De betaling is mislukt bij MPS."
 
 #. module: payment_mps
 #. odoo-python
+#: code:addons/payment_mps/models/payment_provider.py:0
+msgid ""
+"The payment provider rejected the request.\n"
+"%s"
+msgstr "De betaalprovider weigerde het verzoek.\n%s"
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid "The refund %s cannot be read: its MPS payment is not known."
+msgstr "De terugbetaling %s kan niet worden opgevraagd: de MPS-betaling ervan is niet bekend."
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid "The refund was canceled in MPS. Nothing was refunded."
+msgstr "De terugbetaling werd in MPS geannuleerd. Er is niets terugbetaald."
+
+#. module: payment_mps
+#. odoo-python
 #: code:addons/payment_mps/models/payment_transaction.py:0
 msgid "The shopper left the MPS checkout without paying."
 msgstr "De klant verliet de betaalpagina van MPS zonder te betalen."
@@ -180,9 +259,9 @@ msgstr ""
 #. module: payment_mps
 #: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
 msgid ""
-"This is a test key. It works for 24 hours and accepts only the MPS test "
-"cards: no card is charged and nothing is paid out."
-msgstr "Dit is een testsleutel. Ze werkt 24 uur en aanvaardt alleen de testkaarten van MPS: er wordt geen kaart gedebiteerd en er wordt niets uitbetaald."
+"This is a test key. It accepts only the MPS test cards: no card is charged "
+"and nothing is paid out."
+msgstr "Dit is een testsleutel. Ze aanvaardt alleen de testkaarten van MPS: er wordt geen kaart gedebiteerd en er wordt niets uitbetaald."
 
 #. module: payment_mps
 #: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
@@ -195,6 +274,15 @@ msgstr "Deze betaalmethode stuurt het bedrag en het nummer van de bestelling en 
 #: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_webhook_secret
 msgid "Webhook Signing Secret"
 msgstr "Ondertekeningsgeheim voor webhooks"
+
+#. module: payment_mps
+#. odoo-python
+#: code:addons/payment_mps/models/payment_transaction.py:0
+msgid ""
+"Your MPS API key may not make refunds: it lacks the payments:refund "
+"permission. A production key holds it only when MPS granted it, so ask MPS "
+"to grant it to this key. A test key always holds it."
+msgstr "Uw MPS API-sleutel mag geen terugbetalingen doen: het recht payments:refund ontbreekt. Een productiesleutel heeft het alleen als MPS het toekende; vraag MPS het aan deze sleutel toe te kennen. Een testsleutel heeft het altijd."
 
 #. module: payment_mps
 #: model_terms:payment.provider,auth_msg:payment_mps.payment_provider_mps
@@ -218,8 +306,8 @@ msgstr "Uw betaling is verwerkt."
 
 #. module: payment_mps
 #: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
-msgid "test_BE0000000000"
-msgstr "test_BE0000000000"
+msgid "mps_live_…"
+msgstr "mps_live_…"
 
 #. module: payment_mps
 #: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form

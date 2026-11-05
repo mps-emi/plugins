@@ -47,17 +47,17 @@ msgstr ""
 #. odoo-python
 #: code:addons/payment_mps/models/payment_provider.py:0
 msgid ""
-"Fill in the API key from the MPS platform (Online › Get started) before "
+"Fill in the API key from the MPS platform (Online › API keys) before "
 "enabling or publishing MPS. MPS connects with an API key only; a client ID "
 "and secret are no longer used."
-msgstr "Saisissez la clé API de la plateforme MPS (En ligne › Commencer) avant d'activer ou de publier MPS. MPS se connecte uniquement avec une clé API ; un identifiant client et un secret client ne sont plus utilisés."
+msgstr "Saisissez la clé API de la plateforme MPS (En ligne › Clés API) avant d'activer ou de publier MPS. MPS se connecte uniquement avec une clé API ; un identifiant client et un secret client ne sont plus utilisés."
 
 #. module: payment_mps
 #: model:ir.model.fields,help:payment_mps.field_payment_provider__mps_api_key
 msgid ""
-"From the MPS platform, under Online › Get started. A test key starts with "
+"From the MPS platform, under Online › API keys. A test key starts with "
 "mps_test_."
-msgstr "Depuis la plateforme MPS, sous En ligne › Commencer. Une clé de test commence par mps_test_."
+msgstr "Depuis la plateforme MPS, sous En ligne › Clés API. Une clé de test commence par mps_test_."
 
 #. module: payment_mps
 #: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_gateway_url
@@ -179,10 +179,10 @@ msgstr "MPS envoie ce remboursement après le %(until)s (UTC). Jusque-là, il pe
 #. module: payment_mps
 #: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
 msgid ""
-"Paste the API key from the MPS platform (Online › Get started) to enable or "
+"Paste the API key from the MPS platform (Online › API keys) to enable or "
 "publish this provider. MPS connects with an API key only: a client ID and "
 "secret from an earlier setup are no longer used."
-msgstr "Collez la clé API de la plateforme MPS (En ligne › Commencer) pour activer ou publier ce fournisseur. MPS se connecte uniquement avec une clé API : l'identifiant client et le secret client d'une configuration antérieure ne sont plus utilisés."
+msgstr "Collez la clé API de la plateforme MPS (En ligne › Clés API) pour activer ou publier ce fournisseur. MPS se connecte uniquement avec une clé API : l'identifiant client et le secret client d'une configuration antérieure ne sont plus utilisés."
 
 #. module: payment_mps
 #: model:ir.model,name:payment_mps.model_payment_provider

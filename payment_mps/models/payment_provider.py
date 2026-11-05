@@ -30,7 +30,7 @@ class PaymentProvider(models.Model):
     # published (`_check_required_if_provider`).
     mps_api_key = fields.Char(
         string="API Key",
-        help="From the MPS platform, under Online › Get started. A test key starts with mps_test_.",
+        help="From the MPS platform, under Online › API keys. A test key starts with mps_test_.",
         copy=False,
         groups="base.group_system",
     )
@@ -100,7 +100,7 @@ class PaymentProvider(models.Model):
         ):
             raise ValidationError(
                 self.env._(
-                    "Fill in the API key from the MPS platform (Online › Get started) before enabling"
+                    "Fill in the API key from the MPS platform (Online › API keys) before enabling"
                     " or publishing MPS. MPS connects with an API key only; a client ID and secret are"
                     " no longer used."
                 )

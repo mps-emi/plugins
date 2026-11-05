@@ -47,17 +47,17 @@ msgstr ""
 #. odoo-python
 #: code:addons/payment_mps/models/payment_provider.py:0
 msgid ""
-"Fill in the API key from the MPS platform (Online › Get started) before "
+"Fill in the API key from the MPS platform (Online › API keys) before "
 "enabling or publishing MPS. MPS connects with an API key only; a client ID "
 "and secret are no longer used."
-msgstr "Vul de API-sleutel uit het MPS-platform (Online › Aan de slag) in voordat u MPS inschakelt of publiceert. MPS verbindt alleen nog met een API-sleutel; een client-ID en clientgeheim worden niet meer gebruikt."
+msgstr "Vul de API-sleutel uit het MPS-platform (Online › API-sleutels) in voordat u MPS inschakelt of publiceert. MPS verbindt alleen nog met een API-sleutel; een client-ID en clientgeheim worden niet meer gebruikt."
 
 #. module: payment_mps
 #: model:ir.model.fields,help:payment_mps.field_payment_provider__mps_api_key
 msgid ""
-"From the MPS platform, under Online › Get started. A test key starts with "
+"From the MPS platform, under Online › API keys. A test key starts with "
 "mps_test_."
-msgstr "Uit het MPS-platform, onder Online › Aan de slag. Een testsleutel begint met mps_test_."
+msgstr "Uit het MPS-platform, onder Online › API-sleutels. Een testsleutel begint met mps_test_."
 
 #. module: payment_mps
 #: model:ir.model.fields,field_description:payment_mps.field_payment_provider__mps_gateway_url
@@ -179,10 +179,10 @@ msgstr "MPS verstuurt deze terugbetaling na %(until)s (UTC). Tot dan kan ze nog 
 #. module: payment_mps
 #: model_terms:ir.ui.view,arch_db:payment_mps.payment_provider_form
 msgid ""
-"Paste the API key from the MPS platform (Online › Get started) to enable or "
+"Paste the API key from the MPS platform (Online › API keys) to enable or "
 "publish this provider. MPS connects with an API key only: a client ID and "
 "secret from an earlier setup are no longer used."
-msgstr "Plak de API-sleutel uit het MPS-platform (Online › Aan de slag) om deze provider in te schakelen of te publiceren. MPS verbindt alleen nog met een API-sleutel: een client-ID en clientgeheim van een eerdere installatie worden niet meer gebruikt."
+msgstr "Plak de API-sleutel uit het MPS-platform (Online › API-sleutels) om deze provider in te schakelen of te publiceren. MPS verbindt alleen nog met een API-sleutel: een client-ID en clientgeheim van een eerdere installatie worden niet meer gebruikt."
 
 #. module: payment_mps
 #: model:ir.model,name:payment_mps.model_payment_provider

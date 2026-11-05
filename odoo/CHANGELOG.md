@@ -2,6 +2,12 @@
 
 `build.sh` refuses to build a version without an entry here.
 
+## 20.0.2.0.1
+
+- The provider form, its help text and the message that refuses an empty API key name the MPS platform's
+  current screen, **Online › API keys** (Dutch *API-sleutels*, French *Clés API*), instead of
+  *Online › Get started*, which only leads there now. Wording only.
+
 ## 20.0.2.0.0
 
 - **First major release**, and the first released since 20.0.1.0.0: it also brings 20.0.1.1.0 – 20.0.1.2.1,

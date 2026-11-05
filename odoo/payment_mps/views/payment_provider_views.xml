@@ -25,7 +25,7 @@
                     colspan="2"
                     invisible="code != 'mps' or mps_has_api_key"
                 >
-                    Paste the API key from the MPS platform (Online › Get started) to enable or publish this provider. MPS connects with an API key only: a client ID and secret from an earlier setup are no longer used.
+                    Paste the API key from the MPS platform (Online › API keys) to enable or publish this provider. MPS connects with an API key only: a client ID and secret from an earlier setup are no longer used.
                 </div>
                 <field
                     name="mps_api_key"

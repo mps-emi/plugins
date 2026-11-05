@@ -54,7 +54,7 @@ transaction — payment or refund — at 10 min, 30 min, 1 h and 6 h) are what s
 — localhost, a private network, or no webhook signing secret pasted — when the shopper closes the tab.
 
 The addon connects with an **API key** (`mps_live_…`, or `mps_test_…` for a test key), pasted with the
-webhook signing secret from the MPS platform (Online › Get started) and sent as `Authorization: Bearer` on
+webhook signing secret from the MPS platform (Online › API keys) and sent as `Authorization: Bearer` on
 every call — there is no token request. It is the only credential: a client ID and secret (the setup
 before MPS issued API keys) are not used since 20.0.2.0.0, and upgrading to it erases them
 (`migrations/20.0.2.0.0/pre-migrate.py`) and takes a provider that had no API key off line. Saving a new

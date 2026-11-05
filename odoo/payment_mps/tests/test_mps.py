@@ -123,7 +123,7 @@ class TestProvider(MpsCommon):
             with self.subTest(values=values), self.assertRaises(ValidationError) as refused:
                 self.mps.write(values)
             self.assertIn("API key", str(refused.exception))
-            self.assertIn("Online › Get started", str(refused.exception))
+            self.assertIn("Online › API keys", str(refused.exception))
         with api_key_check():
             self.mps.write({"mps_api_key": API_KEY, "is_live": True, "is_published": True})
         self.assertTrue(self.mps.is_live and self.mps.is_published)
